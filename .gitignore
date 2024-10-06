@@ -1,0 +1,5 @@
+# Compiled files
+*.hex
+*.o
+*.out
+*.d
