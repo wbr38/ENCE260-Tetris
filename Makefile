@@ -31,7 +31,10 @@ CFLAGS += \
 	-MP
 
 # Object files
-OBJS=game.o system.o button.o led.o timer.o pacer.o tinygl.o display.o ledmat.o font.o task.o
+OBJS=game.o block.o
+
+# from API
+OBJS+=system.o button.o led.o timer.o pacer.o tinygl.o display.o ledmat.o font.o task.o navswitch.o
 
 # Include automatically generated dependency files, if they exist
 -include $(OBJS:.o=.d)
@@ -62,7 +65,7 @@ game.out: $(OBJS)
 # Clean: remove all generated files
 .PHONY: clean
 clean: 
-	-$(DEL) *.o *.out *.hex
+	-$(DEL) *.o *.out *.hex *.d
 
 
 # Target: program project.
