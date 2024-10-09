@@ -1,4 +1,5 @@
 #include "block.h"
+#include "grid.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -89,18 +90,19 @@ block_t* block_generate_next()
     return block;
 }
 
-tinygl_point_t* block_get_points(block_t* block)
+tinygl_point_t* block_get_points(block_t* block, direction_t direction)
 {
-    return block->points[block->direction];
+    return block->points[direction];
 }
 
 void block_rotate(block_t *block)
 {
     direction_t new_dir = (block->direction + 1) % BLOCK_NUM_ROTATIONS;
 
-    // TODO: Check if it's possible to rotate this block
-    // after establish a grid, check if the new position intersects with a wall or placed piece
-    // is_valid_pos(block, new_dir);
+    grid_t* grid = grid_get();
+    bool is_valid = grid_valid_position(grid, block, block->pos.x, block->pos.y, new_dir);
+    if (!is_valid)
+        return;
 
     block->direction = new_dir;
 }
@@ -134,6 +136,12 @@ bool block_move(block_t *block, direction_t direction)
     }
 
     // TODO: Check new position is valid. is_valid_pos(points, x, y, block->direction)
+    
+    grid_t* grid = grid_get();
+    bool is_valid = grid_valid_position(grid, block, x, y, block->direction);
+    if (!is_valid)
+        return;
+    
 
     block->pos.x = x;    
     block->pos.y = y;    
@@ -142,7 +150,7 @@ bool block_move(block_t *block, direction_t direction)
 
 void block_draw(block_t* block)
 {
-    tinygl_point_t* points = block_get_points(block);
+    tinygl_point_t* points = block_get_points(block, block->direction);
     for (uint8_t i = 0; i < ARRAY_SIZE(block->points); i++)
     {
         tinygl_point_t point = points[i];

@@ -24,7 +24,7 @@ typedef struct
 } block_t;
 
 block_t* block_generate_next(void);
-tinygl_point_t* block_get_points(block_t* block);
+tinygl_point_t* block_get_points(block_t* block, direction_t direction);
 
 bool block_move(block_t *block, direction_t direction);
 void block_rotate(block_t *block);

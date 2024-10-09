@@ -1,6 +1,7 @@
 #include <stdbool.h>
 
 #include "block.h"
+#include "grid.h"
 
 // API
 #include "system.h"
@@ -45,7 +46,11 @@ static void button_task(__unused__ void *data)
 
         // TODO: Testing code, remove later
         if (navswitch_push_event_p(NAVSWITCH_PUSH))
+        {
+            grid_t* grid = grid_get();
+            grid_place_block(grid, current_block);
             spawn_new_block();
+        }
 
         // TODO: Remove after testing
         if (navswitch_push_event_p(NAVSWITCH_NORTH))
@@ -86,6 +91,20 @@ static void display_task(__unused__ void *data)
         }
     }
 
+    // draw placed grid points
+    grid_t* grid = grid_get();
+    for (int x = 0; x < TINYGL_WIDTH; x++)
+    {
+        for (int y = 0; y < TINYGL_HEIGHT; y++)
+        {
+            if (grid->tiles[x][y])
+            {
+                tinygl_point_t point = { x, y };
+                tinygl_draw_point(point, 1);
+            }
+        }
+    }
+
     block_draw(current_block);
 }
 
@@ -100,6 +119,8 @@ void spawn_new_block()
 int main(void)
 {
     system_init();
+
+    grid_init();
 
     spawn_new_block();
     led_init();
