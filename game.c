@@ -15,9 +15,9 @@
 // Task frequency (in Hz)
 #define BUTTON_TASK_FREQ 100
 #define DISPLAY_TASK_FREQ 300
-#define TIMER_TASK_FREQ 1 /* 1s */
+#define GRID_MOVE_DOWN_FREQ 1 /* 1s */
 
-block_t* current_block = 0; // The current block being placed
+static bool game_over = false;
 
 static void button_task_init(void)
 {
@@ -49,7 +49,7 @@ static void button_task(__unused__ void *data)
         {
             grid_t* grid = grid_get();
             grid_place_block(grid, current_block);
-            spawn_new_block();
+            block_generate_next();
         }
 
         // TODO: Remove after testing
@@ -91,6 +91,9 @@ static void display_task(__unused__ void *data)
         }
     }
 
+    if (game_over)
+        return;
+
     // draw placed grid points
     grid_t* grid = grid_get();
     for (int x = 0; x < TINYGL_WIDTH; x++)
@@ -108,12 +111,21 @@ static void display_task(__unused__ void *data)
     block_draw(current_block);
 }
 
-void spawn_new_block()
+static void grid_move_down_task(__unused__ void *data)
 {
-    if (current_block != NULL)
-        free(current_block);
+    if (game_over)
+        return;
 
-    current_block = block_generate_next();
+    grid_t* grid = grid_get();
+    bool place_block = block_move(current_block, DIRECTION_DOWN);
+    if (!place_block) {
+        grid_place_block(grid, current_block);
+        bool valid_pos = block_generate_next();
+        if (!valid_pos)
+        {
+            game_over = true;
+        }
+    }
 }
 
 int main(void)
@@ -121,8 +133,8 @@ int main(void)
     system_init();
 
     grid_init();
+    block_generate_next();
 
-    spawn_new_block();
     led_init();
 
     // Task init
@@ -134,6 +146,7 @@ int main(void)
         {
             {.func = display_task, .period = TASK_RATE / DISPLAY_TASK_FREQ},
             {.func = button_task, .period = TASK_RATE / BUTTON_TASK_FREQ},
+            {.func = grid_move_down_task, .period = TASK_RATE /  GRID_MOVE_DOWN_FREQ}
         };
 
     task_schedule(tasks, ARRAY_SIZE(tasks));

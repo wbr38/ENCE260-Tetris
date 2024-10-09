@@ -8,6 +8,8 @@
 
 #define BLOCK_COUNT 7  // 7 total tetris blocks
 
+block_t* current_block = 0; // The current block being placed
+
 // All tetris blocks and their rotations
 // Positions are relative, centered around a point (see image: https://cdn.harddrop.com/1/17/SRS-true-rotations.png)
 // Left=Negative, Right=Positive, Up=Negative, Down=Positive
@@ -70,9 +72,12 @@ const tinygl_point_t blocks[BLOCK_COUNT][BLOCK_NUM_ROTATIONS][BLOCK_NUM_POINTS] 
     },
 };
 
-block_t* block_generate_next()
+bool block_generate_next()
 {
     static uint8_t _nextBlockId = 0;
+
+    if (current_block != NULL)
+        free(current_block);
 
     block_t* block = malloc(sizeof(block_t));
     memcpy(block->points, blocks[_nextBlockId], sizeof(block->points));
@@ -83,11 +88,16 @@ block_t* block_generate_next()
         .y = 1
     };
 
+    current_block = block;
+
     _nextBlockId++;
     if (_nextBlockId >= ARRAY_SIZE(blocks))
         _nextBlockId = 0;
 
-    return block;
+    // check if current_block pos is valid
+    grid_t* grid = grid_get();
+    bool valid_pos = grid_valid_position(grid, current_block, current_block->pos.x, current_block->pos.y, current_block->direction);
+    return valid_pos;
 }
 
 tinygl_point_t* block_get_points(block_t* block, direction_t direction)
@@ -156,6 +166,6 @@ void block_draw(block_t* block)
         tinygl_point_t point = points[i];
         point.x += block->pos.x;
         point.y += block->pos.y;
-        tinygl_draw_point (point, 1);
+        tinygl_draw_point(point, 1);
     }
 }
