@@ -15,6 +15,7 @@
 // Task frequency (in Hz)
 #define BUTTON_TASK_FREQ 100
 #define DISPLAY_TASK_FREQ 300
+#define IR_TASK_FREQ 300
 #define GRID_MOVE_DOWN_FREQ 1 /* 1s */
 
 static bool game_over = false;
@@ -92,7 +93,10 @@ static void display_task(__unused__ void *data)
     }
 
     if (game_over)
+    {
+        tinygl_text("Game Over");
         return;
+    }
 
     // draw placed grid points
     grid_t* grid = grid_get();
@@ -128,14 +132,49 @@ static void grid_move_down_task(__unused__ void *data)
     }
 }
 
+static char character = 'A';
+static void ir_update_task(__unused__ void *data)
+{
+    tinygl_update ();
+
+    navswitch_update ();
+    
+    if (navswitch_push_event_p (NAVSWITCH_NORTH))
+    {
+        character++;
+        ir_uart_putc(character);
+    }
+
+    if (navswitch_push_event_p (NAVSWITCH_SOUTH))
+    {
+        character--;
+        ir_uart_putc(character);
+    }
+
+    // if (navswitch_push_event_p (NAVSWITCH_PUSH))
+    //     ir_uart_putc(character);
+
+    if (ir_uart_read_ready_p ())
+    {
+        char c = ir_uart_getc ();
+        if (c >= 'A' && c <= 'Z')
+            character = c;
+    }
+
+    char buffer[2];
+    buffer[0] = character;
+    buffer[1] = '\0';
+    tinygl_text (buffer);
+}
+
 int main(void)
 {
     system_init();
+    ir_uart_init();
+    led_init();
 
     grid_init();
     block_generate_next();
-
-    led_init();
 
     // Task init
     display_task_init();
@@ -144,9 +183,10 @@ int main(void)
     // Run tasks
     task_t tasks[] =
         {
-            {.func = display_task, .period = TASK_RATE / DISPLAY_TASK_FREQ},
-            {.func = button_task, .period = TASK_RATE / BUTTON_TASK_FREQ},
-            {.func = grid_move_down_task, .period = TASK_RATE /  GRID_MOVE_DOWN_FREQ}
+            // {.func = display_task, .period = TASK_RATE / DISPLAY_TASK_FREQ},
+            // {.func = button_task, .period = TASK_RATE / BUTTON_TASK_FREQ},
+            // {.func = grid_move_down_task, .period = TASK_RATE /  GRID_MOVE_DOWN_FREQ},
+            {.func = ir_update_task, .period = TASK_RATE /  IR_TASK_FREQ}
         };
 
     task_schedule(tasks, ARRAY_SIZE(tasks));
