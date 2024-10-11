@@ -15,10 +15,10 @@ void grid_init(void)
     }
 }
 
-bool grid_valid_position(grid_t* grid, block_t* block, uint8_t x, uint8_t y, direction_t direction)
+bool grid_valid_position(grid_t* grid, piece_t* piece, uint8_t x, uint8_t y, direction_t direction)
 {
-    tinygl_point_t* points = block_get_points(block, direction);
-    for (uint8_t i = 0; i < ARRAY_SIZE(block->points); i++)
+    tinygl_point_t* points = piece_get_points(piece, direction);
+    for (uint8_t i = 0; i < ARRAY_SIZE(piece->points); i++)
     {
         tinygl_point_t point = points[i];
         point.x += x;
@@ -41,15 +41,15 @@ bool grid_valid_position(grid_t* grid, block_t* block, uint8_t x, uint8_t y, dir
     return true;
 }
 
-void grid_place_block(grid_t* grid, block_t* block)
+void grid_place_piece(grid_t* grid, piece_t* piece)
 {
-    tinygl_point_t* points = block_get_points(block, block->direction);
+    tinygl_point_t* points = piece_get_points(piece, piece->direction);
 
-    for (uint8_t i = 0; i < ARRAY_SIZE(block->points); i++)
+    for (uint8_t i = 0; i < ARRAY_SIZE(piece->points); i++)
     {
         tinygl_point_t point = points[i];
-        point.x += block->pos.x;
-        point.y += block->pos.y;
+        point.x += piece->pos.x;
+        point.y += piece->pos.y;
         grid->tiles[point.x][point.y] = true;
     }
 }

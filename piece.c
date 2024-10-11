@@ -1,4 +1,4 @@
-#include "block.h"
+#include "piece.h"
 #include "grid.h"
 
 #include <string.h>
@@ -6,16 +6,16 @@
 
 #include "navswitch.h"
 
-#define BLOCK_COUNT 7  // 7 total tetris blocks
+#define PIECES_COUNT 7  // 7 total tetris pieces
 
-block_t* current_block = 0; // The current block being placed
+piece_t* current_piece = 0; // The current piece being placed
 
-// All tetris blocks and their rotations
+// All tetris pieces and their rotations
 // Positions are relative, centered around a point (see image: https://cdn.harddrop.com/1/17/SRS-true-rotations.png)
 // Left=Negative, Right=Positive, Up=Negative, Down=Positive
-const tinygl_point_t blocks[BLOCK_COUNT][BLOCK_NUM_ROTATIONS][BLOCK_NUM_POINTS] = {
+const tinygl_point_t pieces[PIECES_COUNT][PIECE_NUM_ROTATIONS][PIECE_NUM_POINTS] = {
 
-    // I Block
+    // I Piece
     {
         { {-1, 0}, {0, 0}, {1, 0}, {2, 0} },
         { {0, -1}, {0, 0}, {0, 1}, {0, 2} },
@@ -23,7 +23,7 @@ const tinygl_point_t blocks[BLOCK_COUNT][BLOCK_NUM_ROTATIONS][BLOCK_NUM_POINTS] 
         { {0, -2}, {0, -1}, {0, 0}, {0, 1} },
     },
 
-    // J Block
+    // J Piece
     {
         { {-1, -1}, {-1, 0}, {0, 0}, {1, 0} },
         { {1, -1}, {0, -1}, {0, 0}, {0, 1} },
@@ -31,7 +31,7 @@ const tinygl_point_t blocks[BLOCK_COUNT][BLOCK_NUM_ROTATIONS][BLOCK_NUM_POINTS] 
         { {-1, 1}, {0, 1}, {0, 0}, {0, -1} },
     },
 
-    // L Block
+    // L Piece
     {
         { {-1, 0}, {0, 0}, {1, 0}, {1, -1} },
         { {0, 1}, {0, 0}, {0, -1}, {1, 1} },
@@ -39,7 +39,7 @@ const tinygl_point_t blocks[BLOCK_COUNT][BLOCK_NUM_ROTATIONS][BLOCK_NUM_POINTS] 
         { {-1, -1}, {0, -1}, {0, 0}, {0, 1} },
     },
 
-    // O (Square) Block
+    // O (Square) Piece
     {
         { {0, 0}, {0, -1}, {1, -1}, {1, 0} },
         { {0, 0}, {0, -1}, {1, -1}, {1, 0} },
@@ -47,7 +47,7 @@ const tinygl_point_t blocks[BLOCK_COUNT][BLOCK_NUM_ROTATIONS][BLOCK_NUM_POINTS] 
         { {0, 0}, {0, -1}, {1, -1}, {1, 0} },
     },
 
-    // S Block
+    // S Piece
     {
         { {-1, 0}, {0, 0}, {0, -1}, {1, -1} },
         { {0, -1}, {0, 0}, {1, 0}, {1, 1} },
@@ -55,7 +55,7 @@ const tinygl_point_t blocks[BLOCK_COUNT][BLOCK_NUM_ROTATIONS][BLOCK_NUM_POINTS] 
         { {-1, 0}, {-1, -1}, {0, 0}, {0, 1} },
     },
 
-    // T Block
+    // T Piece
     {
         { {-1, 0}, {0, 0}, {0, -1}, {1, 0} },
         { {0, -1}, {0, 0}, {0, 1}, {1, 0} },
@@ -63,7 +63,7 @@ const tinygl_point_t blocks[BLOCK_COUNT][BLOCK_NUM_ROTATIONS][BLOCK_NUM_POINTS] 
         { {-1, 0}, {0, 0}, {0, -1}, {0, 1} },
     },
 
-    // Z Block
+    // Z Piece
     {
         { {-1, -1}, {0, -1}, {0, 0}, {1, 0} },
         { {0, 1}, {0, 0}, {1, 0}, {1, -1} },
@@ -72,53 +72,53 @@ const tinygl_point_t blocks[BLOCK_COUNT][BLOCK_NUM_ROTATIONS][BLOCK_NUM_POINTS] 
     },
 };
 
-bool block_generate_next()
+bool piece_generate_next()
 {
-    static uint8_t _nextBlockId = 0;
+    static uint8_t _nextPieceId = 0;
 
-    if (current_block != NULL)
-        free(current_block);
+    if (current_piece != NULL)
+        free(current_piece);
 
-    block_t* block = malloc(sizeof(block_t));
-    memcpy(block->points, blocks[_nextBlockId], sizeof(block->points));
-    block->direction = DIRECTION_UP;
+    piece_t* piece = malloc(sizeof(piece_t));
+    memcpy(piece->points, pieces[_nextPieceId], sizeof(piece->points));
+    piece->direction = DIRECTION_UP;
 
-    block->pos = (tinygl_point_t){
-        .x = TINYGL_WIDTH / 2, // spawn block initially in center
+    piece->pos = (tinygl_point_t){
+        .x = TINYGL_WIDTH / 2, // spawn piece initially in center
         .y = 1
     };
 
-    current_block = block;
+    current_piece = piece;
 
-    _nextBlockId++;
-    if (_nextBlockId >= ARRAY_SIZE(blocks))
-        _nextBlockId = 0;
+    _nextPieceId++;
+    if (_nextPieceId >= ARRAY_SIZE(pieces))
+        _nextPieceId = 0;
 
-    // check if current_block pos is valid
-    bool valid_pos = grid_valid_position(grid, current_block, current_block->pos.x, current_block->pos.y, current_block->direction);
+    // check if current_piece pos is valid
+    bool valid_pos = grid_valid_position(grid, current_piece, current_piece->pos.x, current_piece->pos.y, current_piece->direction);
     return valid_pos;
 }
 
-tinygl_point_t* block_get_points(block_t* block, direction_t direction)
+tinygl_point_t* piece_get_points(piece_t* piece, direction_t direction)
 {
-    return block->points[direction];
+    return piece->points[direction];
 }
 
-void block_rotate(block_t *block)
+void piece_rotate(piece_t *piece)
 {
-    direction_t new_dir = (block->direction + 1) % BLOCK_NUM_ROTATIONS;
+    direction_t new_dir = (piece->direction + 1) % PIECE_NUM_ROTATIONS;
 
-    bool is_valid = grid_valid_position(grid, block, block->pos.x, block->pos.y, new_dir);
+    bool is_valid = grid_valid_position(grid, piece, piece->pos.x, piece->pos.y, new_dir);
     if (!is_valid)
         return;
 
-    block->direction = new_dir;
+    piece->direction = new_dir;
 }
 
-bool block_move(block_t *block, direction_t direction)
+bool piece_move(piece_t *piece, direction_t direction)
 {
-    int x = block->pos.x;
-    int y = block->pos.y;
+    int x = piece->pos.x;
+    int y = piece->pos.y;
 
     switch (direction)
     {
@@ -143,25 +143,25 @@ bool block_move(block_t *block, direction_t direction)
         break;
     }
 
-    // TODO: Check new position is valid. is_valid_pos(points, x, y, block->direction)
+    // TODO: Check new position is valid. is_valid_pos(points, x, y, piece->direction)
     
-    bool is_valid = grid_valid_position(grid, block, x, y, block->direction);
+    bool is_valid = grid_valid_position(grid, piece, x, y, piece->direction);
     if (!is_valid)
         return false;
 
-    block->pos.x = x;    
-    block->pos.y = y;    
+    piece->pos.x = x;    
+    piece->pos.y = y;    
     return true;
 }
 
-void block_draw(block_t* block)
+void piece_draw(piece_t* piece)
 {
-    tinygl_point_t* points = block_get_points(block, block->direction);
-    for (uint8_t i = 0; i < ARRAY_SIZE(block->points); i++)
+    tinygl_point_t* points = piece_get_points(piece, piece->direction);
+    for (uint8_t i = 0; i < ARRAY_SIZE(piece->points); i++)
     {
         tinygl_point_t point = points[i];
-        point.x += block->pos.x;
-        point.y += block->pos.y;
+        point.x += piece->pos.x;
+        point.y += piece->pos.y;
         tinygl_draw_point(point, 1);
     }
 }

@@ -1,9 +1,9 @@
 # TODO
 - Add `grid` module:
     - Store the planted tetris pieces
-    - Add a function to calculate if a block position is valid (does it intersect with any placed pieces or the edges of the display)
+    - Add a function to calculate if a piece position is valid (does it intersect with any placed pieces or the edges of the display)
 
-- Add boundary/collision checks when moving blocks
+- Add boundary/collision checks when moving pieces
     - Don't move a piece off the screen
     - Don't move piece into another
 

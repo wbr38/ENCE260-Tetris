@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include "tinygl.h"
 
-#include "block.h"
+#include "piece.h"
 
 typedef struct {
     bool tiles[TINYGL_WIDTH][TINYGL_HEIGHT];
@@ -15,6 +15,6 @@ typedef struct {
 extern grid_t* grid;
 
 void grid_init(void);
-void grid_place_block(grid_t* grid, block_t* block);
-bool grid_valid_position(grid_t* grid, block_t* block, uint8_t x, uint8_t y, direction_t direction);
+void grid_place_piece(grid_t* grid, piece_t* piece);
+bool grid_valid_position(grid_t* grid, piece_t* piece, uint8_t x, uint8_t y, direction_t direction);
 #endif // GRID_H

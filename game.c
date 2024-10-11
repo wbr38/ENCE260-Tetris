@@ -1,6 +1,6 @@
 #include <stdbool.h>
 
-#include "block.h"
+#include "piece.h"
 #include "grid.h"
 
 // API
@@ -34,7 +34,7 @@ static void button_task(__unused__ void *data)
         
         // TODO: Testing code, remove later
         if (button_push_event_p(BUTTON1))
-            block_rotate(current_block);
+            piece_rotate(current_piece);
 
         if (button_down_p(BUTTON1))
             led_set(LED1, 1);
@@ -49,23 +49,23 @@ static void button_task(__unused__ void *data)
         // TODO: Testing code, remove later
         if (navswitch_push_event_p(NAVSWITCH_PUSH))
         {
-            grid_place_block(grid, current_block);
-            block_generate_next();
+            grid_place_piece(grid, current_piece);
+            piece_generate_next();
         }
 
         // TODO: Remove after testing
         if (navswitch_push_event_p(NAVSWITCH_NORTH))
-            block_move(current_block, DIRECTION_UP);
+            piece_move(current_piece, DIRECTION_UP);
 
-        // Move current block
+        // Move current piece
         if (navswitch_push_event_p(NAVSWITCH_EAST))
-            block_move(current_block, DIRECTION_RIGHT);
+            piece_move(current_piece, DIRECTION_RIGHT);
 
         if (navswitch_push_event_p(NAVSWITCH_WEST))
-            block_move(current_block, DIRECTION_LEFT);
+            piece_move(current_piece, DIRECTION_LEFT);
 
         if (navswitch_push_event_p(NAVSWITCH_SOUTH))
-            block_move(current_block, DIRECTION_DOWN);
+            piece_move(current_piece, DIRECTION_DOWN);
     }
 }
 
@@ -128,7 +128,7 @@ static void display_task(__unused__ void *data)
         }
     }
 
-    block_draw(current_block);
+    piece_draw(current_piece);
     tinygl_update();
 }
 
@@ -137,10 +137,10 @@ static void grid_move_down_task(__unused__ void *data)
     if (game_over)
         return;
 
-    bool place_block = block_move(current_block, DIRECTION_DOWN);
-    if (!place_block) {
-        grid_place_block(grid, current_block);
-        bool valid_pos = block_generate_next();
+    bool place_piece = piece_move(current_piece, DIRECTION_DOWN);
+    if (!place_piece) {
+        grid_place_piece(grid, current_piece);
+        bool valid_pos = piece_generate_next();
         if (!valid_pos)
         {
             game_over = true;
@@ -190,7 +190,7 @@ int main(void)
     led_init();
 
     grid_init();
-    block_generate_next();
+    piece_generate_next();
 
     // Task init
     display_task_init();
