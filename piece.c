@@ -1,5 +1,5 @@
 #include "piece.h"
-#include "grid.h"
+#include "board.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -95,7 +95,7 @@ bool piece_generate_next()
         _nextPieceId = 0;
 
     // check if current_piece pos is valid
-    bool valid_pos = grid_valid_position(grid, current_piece, current_piece->pos.x, current_piece->pos.y, current_piece->direction);
+    bool valid_pos = board_valid_position(board, current_piece, current_piece->pos.x, current_piece->pos.y, current_piece->direction);
     return valid_pos;
 }
 
@@ -108,7 +108,7 @@ void piece_rotate(piece_t *piece)
 {
     direction_t new_dir = (piece->direction + 1) % PIECE_NUM_ROTATIONS;
 
-    bool is_valid = grid_valid_position(grid, piece, piece->pos.x, piece->pos.y, new_dir);
+    bool is_valid = board_valid_position(board, piece, piece->pos.x, piece->pos.y, new_dir);
     if (!is_valid)
         return;
 
@@ -145,7 +145,7 @@ bool piece_move(piece_t *piece, direction_t direction)
 
     // TODO: Check new position is valid. is_valid_pos(points, x, y, piece->direction)
     
-    bool is_valid = grid_valid_position(grid, piece, x, y, piece->direction);
+    bool is_valid = board_valid_position(board, piece, x, y, piece->direction);
     if (!is_valid)
         return false;
 

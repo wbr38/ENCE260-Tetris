@@ -1,5 +1,5 @@
 # TODO
-- Add `grid` module:
+- Add `board` module:
     - Store the planted tetris pieces
     - Add a function to calculate if a piece position is valid (does it intersect with any placed pieces or the edges of the display)
 
@@ -9,6 +9,6 @@
 
 - Add task for automatically updating piece position
     - automatically move pieces down
-    - if the next move down is invalid, place the piece on the grid
+    - if the next move down is invalid, place the piece on the board
     - then generate the next piece to spawn
     - ^ somewhere, have a check if the game is over. I.e. will the next piece to spawn be a valid position or not

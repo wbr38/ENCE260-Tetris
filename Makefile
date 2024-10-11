@@ -31,7 +31,7 @@ CFLAGS += \
 	-MP
 
 # Object files
-OBJS=game.o piece.o grid.o
+OBJS=game.o piece.o board.o
 
 # from API
 OBJS+=system.o button.o led.o timer.o pacer.o tinygl.o display.o ledmat.o font.o task.o navswitch.o ir_uart.o timer0.o usart1.o prescale.o

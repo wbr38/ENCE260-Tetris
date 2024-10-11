@@ -1,7 +1,7 @@
 #include <stdbool.h>
 
 #include "piece.h"
-#include "grid.h"
+#include "board.h"
 
 // API
 #include "system.h"
@@ -17,7 +17,7 @@
 #define BUTTON_TASK_FREQ 100
 #define DISPLAY_TASK_FREQ 300
 #define IR_TASK_FREQ 300
-#define GRID_MOVE_DOWN_FREQ 1 /* 1s */
+#define BOARD_MOVE_DOWN_FREQ 1 /* 1s */
 
 static bool game_over = false;
 
@@ -49,7 +49,7 @@ static void button_task(__unused__ void *data)
         // TODO: Testing code, remove later
         if (navswitch_push_event_p(NAVSWITCH_PUSH))
         {
-            grid_place_piece(grid, current_piece);
+            board_place_piece(board, current_piece);
             piece_generate_next();
         }
 
@@ -115,12 +115,12 @@ static void display_task(__unused__ void *data)
     // Clear screen
     screen_clear();
 
-    // draw placed grid points
+    // draw placed board points
     for (int x = 0; x < TINYGL_WIDTH; x++)
     {
         for (int y = 0; y < TINYGL_HEIGHT; y++)
         {
-            if (grid->tiles[x][y])
+            if (board->tiles[x][y])
             {
                 tinygl_point_t point = { x, y };
                 tinygl_draw_point(point, 1);
@@ -132,14 +132,14 @@ static void display_task(__unused__ void *data)
     tinygl_update();
 }
 
-static void grid_move_down_task(__unused__ void *data)
+static void board_move_down_task(__unused__ void *data)
 {
     if (game_over)
         return;
 
     bool place_piece = piece_move(current_piece, DIRECTION_DOWN);
     if (!place_piece) {
-        grid_place_piece(grid, current_piece);
+        board_place_piece(board, current_piece);
         bool valid_pos = piece_generate_next();
         if (!valid_pos)
         {
@@ -189,7 +189,7 @@ int main(void)
     ir_uart_init();
     led_init();
 
-    grid_init();
+    board_init();
     piece_generate_next();
 
     // Task init
@@ -201,7 +201,7 @@ int main(void)
         {
             {.func = display_task, .period = TASK_RATE / DISPLAY_TASK_FREQ},
             {.func = button_task, .period = TASK_RATE / BUTTON_TASK_FREQ},
-            {.func = grid_move_down_task, .period = TASK_RATE /  GRID_MOVE_DOWN_FREQ},
+            {.func = board_move_down_task, .period = TASK_RATE /  BOARD_MOVE_DOWN_FREQ},
             // {.func = ir_update_task, .period = TASK_RATE /  IR_TASK_FREQ}
         };
 
