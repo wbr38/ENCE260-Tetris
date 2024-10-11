@@ -15,21 +15,29 @@ typedef enum
     DIRECTION_RIGHT
 } direction_t;
 
+typedef enum
+{
+    ORIENTATION_NORTH,
+    ORIENTATION_SOUTH,
+    ORIENTATION_WEST,
+    ORIENTATION_EAST
+} orientation_t;
+
 // Represents a tetris piece (tetromino)
 typedef struct
 {
     tinygl_point_t points[PIECE_NUM_ROTATIONS][PIECE_NUM_POINTS];
     tinygl_point_t pos;
-    direction_t direction;
+    orientation_t orientation;
 } piece_t;
 
 extern piece_t* current_piece;
 
 bool piece_generate_next(void);
-tinygl_point_t* piece_get_points(piece_t* piece, direction_t direction);
+tinygl_point_t* piece_get_points(piece_t* piece, orientation_t orientation);
 
 bool piece_move(piece_t *piece, direction_t direction);
-void piece_rotate(piece_t *piece);
+bool piece_rotate(piece_t *piece);
 void piece_draw(piece_t *piece);
 
 #endif // PIECE_H

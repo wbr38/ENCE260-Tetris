@@ -81,7 +81,7 @@ bool piece_generate_next()
 
     piece_t* piece = malloc(sizeof(piece_t));
     memcpy(piece->points, pieces[_nextPieceId], sizeof(piece->points));
-    piece->direction = DIRECTION_UP;
+    piece->orientation = ORIENTATION_NORTH;
 
     piece->pos = (tinygl_point_t){
         .x = TINYGL_WIDTH / 2, // spawn piece initially in center
@@ -95,24 +95,25 @@ bool piece_generate_next()
         _nextPieceId = 0;
 
     // check if current_piece pos is valid
-    bool valid_pos = board_valid_position(board, current_piece, current_piece->pos.x, current_piece->pos.y, current_piece->direction);
+    bool valid_pos = board_valid_position(board, current_piece, current_piece->pos.x, current_piece->pos.y, current_piece->orientation);
     return valid_pos;
 }
 
-tinygl_point_t* piece_get_points(piece_t* piece, direction_t direction)
+tinygl_point_t* piece_get_points(piece_t* piece, orientation_t orientation)
 {
-    return piece->points[direction];
+    return piece->points[orientation];
 }
 
-void piece_rotate(piece_t *piece)
+bool piece_rotate(piece_t *piece)
 {
-    direction_t new_dir = (piece->direction + 1) % PIECE_NUM_ROTATIONS;
+    orientation_t new_orientation = (piece->orientation + 1) % PIECE_NUM_ROTATIONS;
 
-    bool is_valid = board_valid_position(board, piece, piece->pos.x, piece->pos.y, new_dir);
+    bool is_valid = board_valid_position(board, piece, piece->pos.x, piece->pos.y, new_orientation);
     if (!is_valid)
-        return;
+        return false;
 
-    piece->direction = new_dir;
+    piece->orientation = new_orientation;
+    return true;
 }
 
 bool piece_move(piece_t *piece, direction_t direction)
@@ -143,9 +144,9 @@ bool piece_move(piece_t *piece, direction_t direction)
         break;
     }
 
-    // TODO: Check new position is valid. is_valid_pos(points, x, y, piece->direction)
-    
-    bool is_valid = board_valid_position(board, piece, x, y, piece->direction);
+    // Check this new position is valid
+    // TODO: Try to "kick" the piece into place
+    bool is_valid = board_valid_position(board, piece, x, y, piece->orientation);
     if (!is_valid)
         return false;
 
@@ -156,7 +157,7 @@ bool piece_move(piece_t *piece, direction_t direction)
 
 void piece_draw(piece_t* piece)
 {
-    tinygl_point_t* points = piece_get_points(piece, piece->direction);
+    tinygl_point_t* points = piece_get_points(piece, piece->orientation);
     for (uint8_t i = 0; i < ARRAY_SIZE(piece->points); i++)
     {
         tinygl_point_t point = points[i];

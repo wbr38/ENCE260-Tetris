@@ -42,7 +42,7 @@ bool board_valid_position(board_t* board, piece_t* piece, uint8_t x, uint8_t y, 
 
 void board_place_piece(board_t* board, piece_t* piece)
 {
-    tinygl_point_t* points = piece_get_points(piece, piece->direction);
+    tinygl_point_t* points = piece_get_points(piece, piece->orientation);
 
     for (uint8_t i = 0; i < ARRAY_SIZE(piece->points); i++)
     {
