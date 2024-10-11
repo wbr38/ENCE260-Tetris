@@ -1,7 +1,7 @@
 
 #include "grid.h"
 
-static grid_t* grid = 0;
+grid_t* grid = 0;
 
 void grid_init(void)
 {
@@ -13,11 +13,6 @@ void grid_init(void)
             grid->tiles[x][y] = false;
         }
     }
-}
-
-grid_t* grid_get()
-{
-    return grid;
 }
 
 bool grid_valid_position(grid_t* grid, block_t* block, uint8_t x, uint8_t y, direction_t direction)

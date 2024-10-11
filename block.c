@@ -95,7 +95,6 @@ bool block_generate_next()
         _nextBlockId = 0;
 
     // check if current_block pos is valid
-    grid_t* grid = grid_get();
     bool valid_pos = grid_valid_position(grid, current_block, current_block->pos.x, current_block->pos.y, current_block->direction);
     return valid_pos;
 }
@@ -109,7 +108,6 @@ void block_rotate(block_t *block)
 {
     direction_t new_dir = (block->direction + 1) % BLOCK_NUM_ROTATIONS;
 
-    grid_t* grid = grid_get();
     bool is_valid = grid_valid_position(grid, block, block->pos.x, block->pos.y, new_dir);
     if (!is_valid)
         return;
@@ -147,7 +145,6 @@ bool block_move(block_t *block, direction_t direction)
 
     // TODO: Check new position is valid. is_valid_pos(points, x, y, block->direction)
     
-    grid_t* grid = grid_get();
     bool is_valid = grid_valid_position(grid, block, x, y, block->direction);
     if (!is_valid)
         return false;

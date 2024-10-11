@@ -49,7 +49,6 @@ static void button_task(__unused__ void *data)
         // TODO: Testing code, remove later
         if (navswitch_push_event_p(NAVSWITCH_PUSH))
         {
-            grid_t* grid = grid_get();
             grid_place_block(grid, current_block);
             block_generate_next();
         }
@@ -117,7 +116,6 @@ static void display_task(__unused__ void *data)
     screen_clear();
 
     // draw placed grid points
-    grid_t* grid = grid_get();
     for (int x = 0; x < TINYGL_WIDTH; x++)
     {
         for (int y = 0; y < TINYGL_HEIGHT; y++)
@@ -139,7 +137,6 @@ static void grid_move_down_task(__unused__ void *data)
     if (game_over)
         return;
 
-    grid_t* grid = grid_get();
     bool place_block = block_move(current_block, DIRECTION_DOWN);
     if (!place_block) {
         grid_place_block(grid, current_block);
