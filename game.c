@@ -79,11 +79,8 @@ static void display_task_init(void)
     // tinygl_text("Hello, World!");
 }
 
-static void display_task(__unused__ void *data)
+void screen_clear(void)
 {
-    tinygl_update();
-
-    // Clear screen
     for (int x = 0; x < TINYGL_WIDTH; x++)
     {
         for (int y = 0; y < TINYGL_HEIGHT; y++)
@@ -92,12 +89,32 @@ static void display_task(__unused__ void *data)
             tinygl_draw_point(point, 0);
         }
     }
+}
 
+static void game_over_screen(__unused__ void *data)
+{
+    static bool game_over_init = false;
+    if (!game_over_init)
+    {
+        screen_clear();
+        tinygl_text("Game Over");
+        game_over_init = true;
+    }
+
+    tinygl_update();
+}
+
+static void display_task(__unused__ void *data)
+{
+    // TODO: Use an enum for the current game state
     if (game_over)
     {
-        tinygl_text("Game Over");
+        game_over_screen(data);
         return;
     }
+
+    // Clear screen
+    screen_clear();
 
     // draw placed grid points
     grid_t* grid = grid_get();
@@ -114,6 +131,7 @@ static void display_task(__unused__ void *data)
     }
 
     block_draw(current_block);
+    tinygl_update();
 }
 
 static void grid_move_down_task(__unused__ void *data)
@@ -184,10 +202,10 @@ int main(void)
     // Run tasks
     task_t tasks[] =
         {
-            // {.func = display_task, .period = TASK_RATE / DISPLAY_TASK_FREQ},
-            // {.func = button_task, .period = TASK_RATE / BUTTON_TASK_FREQ},
-            // {.func = grid_move_down_task, .period = TASK_RATE /  GRID_MOVE_DOWN_FREQ},
-            {.func = ir_update_task, .period = TASK_RATE /  IR_TASK_FREQ}
+            {.func = display_task, .period = TASK_RATE / DISPLAY_TASK_FREQ},
+            {.func = button_task, .period = TASK_RATE / BUTTON_TASK_FREQ},
+            {.func = grid_move_down_task, .period = TASK_RATE /  GRID_MOVE_DOWN_FREQ},
+            // {.func = ir_update_task, .period = TASK_RATE /  IR_TASK_FREQ}
         };
 
     task_schedule(tasks, ARRAY_SIZE(tasks));
