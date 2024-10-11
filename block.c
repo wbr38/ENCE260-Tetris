@@ -150,8 +150,7 @@ bool block_move(block_t *block, direction_t direction)
     grid_t* grid = grid_get();
     bool is_valid = grid_valid_position(grid, block, x, y, block->direction);
     if (!is_valid)
-        return;
-    
+        return false;
 
     block->pos.x = x;    
     block->pos.y = y;    
