@@ -11,6 +11,7 @@
 #include "tinygl.h"
 #include "navswitch.h"
 #include "font5x7_1.h"
+#include "ir_uart.h"
 
 // Task frequency (in Hz)
 #define BUTTON_TASK_FREQ 100
