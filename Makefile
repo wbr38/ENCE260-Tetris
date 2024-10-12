@@ -1,5 +1,5 @@
 # File:   Makefile
-# Author: M. P. Hayes, UCECE, William Brown
+# Author: M. P. Hayes, UCECE, William Brown, Matthew Wills
 # Date:   12 Sep 2010
 # Descr:  Makefile for game
 

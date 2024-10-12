@@ -1,3 +1,9 @@
+/** @file piece.c
+ *  @authors William Brown, Matthew Wills
+ *  @date 12 October 2024
+ *  @brief Represents a tetris piece/block/tetromino.
+ */
+
 #include "piece.h"
 #include "board.h"
 
@@ -6,13 +12,13 @@
 
 #include "navswitch.h"
 
-#define PIECES_COUNT 7  // 7 total tetris pieces
+piece_t* current_piece = 0; 
 
-piece_t* current_piece = 0; // The current piece being placed
-
-// All tetris pieces and their rotations
-// Positions are relative, centered around a point (see image: https://cdn.harddrop.com/1/17/SRS-true-rotations.png)
-// Left=Negative, Right=Positive, Up=Negative, Down=Positive
+/**
+ * All tetris pieces and their rotations
+ * Positions are relative, centered around a point (see image: https://cdn.harddrop.com/1/17/SRS-true-rotations.png)
+ * Left=Negative, Right=Positive, Up=Negative, Down=Positive
+ */
 const tinygl_point_t pieces[PIECES_COUNT][PIECE_NUM_ROTATIONS][PIECE_NUM_POINTS] = {
 
     // I Piece
@@ -79,22 +85,18 @@ bool piece_generate_next()
     if (current_piece != NULL)
         free(current_piece);
 
-    piece_t* piece = malloc(sizeof(piece_t));
-    memcpy(piece->points, pieces[_nextPieceId], sizeof(piece->points));
-    piece->orientation = ORIENTATION_NORTH;
+    current_piece = malloc(sizeof(piece_t));
+    memcpy(current_piece->points, pieces[_nextPieceId], sizeof(current_piece->points));
+    current_piece->orientation = ORIENTATION_NORTH;
 
-    piece->pos = (tinygl_point_t){
+    current_piece->pos = (tinygl_point_t){
         .x = TINYGL_WIDTH / 2, // spawn piece initially in center
         .y = 1
     };
 
-    current_piece = piece;
+    _nextPieceId = (_nextPieceId + 1) % ARRAY_SIZE(pieces);
 
-    _nextPieceId++;
-    if (_nextPieceId >= ARRAY_SIZE(pieces))
-        _nextPieceId = 0;
-
-    // check if current_piece pos is valid
+    // check if the new current_piece pos is valid
     bool valid_pos = board_valid_position(board, current_piece, current_piece->pos.x, current_piece->pos.y, current_piece->orientation);
     return valid_pos;
 }

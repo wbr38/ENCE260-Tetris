@@ -1,3 +1,9 @@
+/** @file game.c
+ *  @authors William Brown, Matthew Wills
+ *  @date 12 October 2024
+ *  @brief A 1v1 tetris game
+ */
+
 #include <stdbool.h>
 
 #include "piece.h"
