@@ -143,14 +143,25 @@ static void board_move_down_task(__unused__ void *data)
     if (game_over)
         return;
 
-    bool place_piece = piece_move(current_piece, DIRECTION_DOWN);
-    if (!place_piece) {
+    // Detect when a new piece has been spawned, skip moving for this iteration
+    // so the piece isn't moved down immediately as soon as it's spawnedk
+    static piece_t* old_piece = 0;
+    if (old_piece != current_piece)
+    {
+        old_piece = current_piece;
+        return;
+    }
+
+    bool was_moved = piece_move(current_piece, DIRECTION_DOWN);
+
+    // piece was not able to be moved down, so we place this piece on the board at the current location
+    // and spawn the next piece
+    if (!was_moved)
+    {
         board_place_piece(board, current_piece);
         bool valid_pos = piece_generate_next();
         if (!valid_pos)
-        {
             game_over = true;
-        }
     }
 }
 
