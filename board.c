@@ -5,17 +5,14 @@
  */
 
 #include "board.h"
+#include <string.h>
 
 board_t* board = 0;
 
 void board_init(void)
 {
     board = malloc(sizeof(board_t));
-
-    // Initialize all tiles to false
-    for (uint8_t x = 0; x < TINYGL_WIDTH; x++)
-        for (uint8_t y = 0; y < TINYGL_HEIGHT; y++)
-            board->tiles[x][y] = false;
+    memset(board, 0, sizeof(board_t));
 }
 
 bool board_valid_position(board_t* board, piece_t* piece, uint8_t x, uint8_t y, orientation_t orientation)

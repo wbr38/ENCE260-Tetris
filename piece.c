@@ -86,9 +86,11 @@ bool piece_generate_next()
         free(current_piece);
 
     current_piece = malloc(sizeof(piece_t));
+    memset(current_piece, 0, sizeof(piece_t));
+
+    // set values
     memcpy(current_piece->points, pieces[_nextPieceId], sizeof(current_piece->points));
     current_piece->orientation = ORIENTATION_NORTH;
-
     current_piece->pos = (tinygl_point_t){
         .x = TINYGL_WIDTH / 2, // spawn piece initially in center
         .y = 1
