@@ -8,6 +8,7 @@
 
 #include "piece.h"
 #include "board.h"
+#include "packet.h"
 
 // API
 #include "system.h"
@@ -22,10 +23,73 @@
 // Task frequency (in Hz)
 #define BUTTON_TASK_FREQ 100
 #define DISPLAY_TASK_FREQ 300
-#define IR_TASK_FREQ 300
+#define IR_TASK_FREQ 100
 #define BOARD_MOVE_DOWN_FREQ 1 /* 1s */
 
 static bool game_over = false;
+static void handle_packet(packet_t packet) 
+{
+    switch (packet.id)
+    {
+    case PAIRING_PACKET:
+        {
+            // recvd pairing packet, set the rng_seed and respond
+            // uint8_t rng_seed = packet.data;
+
+            packet_t ack = {
+                .id = PAIRING_ACK_PACKET,
+                .data = 0
+            };
+
+            packet_send(ack);
+            // TODO: start 3 2 1 countdown
+            break;
+        }
+
+    case PAIRING_ACK_PACKET:
+        {
+            // recvd pairing ack. maybe have a check to confirm we actuall sent a pairing packet
+            // otherwise start 3 2 1 countdown
+            break;
+        }
+
+    case PING_PACKET:
+        {
+            // todo
+            // maybe we agree that whoever sent the Pairing packet should be the one sending the Ping packet
+            // the other board only sends pong
+            // that way each board knows which packet to expect and recv
+            break;
+        }
+
+    case PONG_PACKET:
+        {
+            // todo
+            break;
+        }
+    
+    case LINE_CLEAR_PACKET:
+        {
+            // TODO
+            break;
+        }
+
+    case DIE_PACKET:
+        {
+            // TODO
+            break;
+        }
+
+    case DIE_ACK_PACKET:
+        {
+            // TODO
+            break;
+        }
+
+    default:
+        break;
+    }
+}
 
 static void button_task_init(void)
 {
@@ -42,10 +106,22 @@ static void button_task(__unused__ void *data)
         if (button_push_event_p(BUTTON1))
             piece_rotate(current_piece);
 
-        if (button_down_p(BUTTON1))
-            led_set(LED1, 1);
-        else
-            led_set(LED1, 0);
+        if (button_push_event_p(BUTTON1))
+        {
+            packet_t packet = {
+                .id = PING_PACKET,
+                .data = 'B' - 'A'
+            };
+            handle_packet(packet);
+        }
+        else if (button_release_event_p(BUTTON1))
+        {
+            packet_t packet = {
+                .id = PONG_PACKET,
+                .data = 'B' - 'A'
+            };
+            handle_packet(packet);
+        }
     }
 
     // Nav Switch
@@ -165,39 +241,14 @@ static void board_move_down_task(__unused__ void *data)
     }
 }
 
-static char character = 'A';
 static void ir_update_task(__unused__ void *data)
 {
-    tinygl_update ();
-
-    navswitch_update ();
+    packet_t packet;
+    bool recvd_packet = packet_get(&packet);
+    if (!recvd_packet)
+        return;
     
-    if (navswitch_push_event_p (NAVSWITCH_NORTH))
-    {
-        character++;
-        ir_uart_putc(character);
-    }
-
-    if (navswitch_push_event_p (NAVSWITCH_SOUTH))
-    {
-        character--;
-        ir_uart_putc(character);
-    }
-
-    // if (navswitch_push_event_p (NAVSWITCH_PUSH))
-    //     ir_uart_putc(character);
-
-    if (ir_uart_read_ready_p ())
-    {
-        char c = ir_uart_getc ();
-        if (c >= 'A' && c <= 'Z')
-            character = c;
-    }
-
-    char buffer[2];
-    buffer[0] = character;
-    buffer[1] = '\0';
-    tinygl_text (buffer);
+    handle_packet(packet);
 }
 
 int main(void)
@@ -219,7 +270,7 @@ int main(void)
             {.func = display_task, .period = TASK_RATE / DISPLAY_TASK_FREQ},
             {.func = button_task, .period = TASK_RATE / BUTTON_TASK_FREQ},
             {.func = board_move_down_task, .period = TASK_RATE /  BOARD_MOVE_DOWN_FREQ},
-            // {.func = ir_update_task, .period = TASK_RATE /  IR_TASK_FREQ}
+            {.func = ir_update_task, .period = TASK_RATE /  IR_TASK_FREQ}
         };
 
     task_schedule(tasks, ARRAY_SIZE(tasks));
