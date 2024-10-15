@@ -13,6 +13,7 @@
 #define PIECES_COUNT        7 // total number of tetris pieces
 #define PIECE_NUM_ROTATIONS 4 // each piece has precalculated 4 rotations
 #define PIECE_NUM_POINTS    4 // each piece is defined with 4 pixel points
+#define PIECE_GRID_SIZE     4 // we define each piece's points on a 4x4 grid.
 
 typedef enum
 {
@@ -53,7 +54,7 @@ typedef struct
 bool piece_generate_next(piece_t** current_piece);
 
 /** Returns a tinygl_point_t array for the given orientation of this piece. */
-const tinygl_point_t* piece_get_points(piece_t* piece, orientation_t orientation);
+const tinygl_point_t* piece_get_points(piece_t* piece, uint8_t x, uint8_t y, orientation_t orientation);
 
 /**
  * @brief Attempt to move the piece in the given direction.

@@ -19,12 +19,10 @@ board_t* board_init(void)
 
 bool board_valid_position(board_t* board, piece_t* piece, uint8_t x, uint8_t y, orientation_t orientation)
 {
-    const tinygl_point_t* points = piece_get_points(piece, orientation);
+    const tinygl_point_t* points = piece_get_points(piece, x, y, orientation);
     for (uint8_t i = 0; i < PIECE_NUM_POINTS; i++)
     {
         tinygl_point_t point = points[i];
-        point.x += x;
-        point.y += y;
 
         // x bounds check
         if (point.x >= TINYGL_WIDTH || point.x < 0)
@@ -82,13 +80,11 @@ uint8_t board_clear_lines(board_t* board)
 
 void board_place_piece(board_t* board, piece_t* piece)
 {
-    const tinygl_point_t* points = piece_get_points(piece, piece->orientation);
+    const tinygl_point_t* points = piece_get_points(piece, piece->pos.x, piece->pos.y, piece->orientation);
 
     for (uint8_t i = 0; i < PIECE_NUM_POINTS; i++)
     {
         tinygl_point_t point = points[i];
-        point.x += piece->pos.x;
-        point.y += piece->pos.y;
         board->tiles[point.x][point.y] = true;
     }
 

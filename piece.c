@@ -14,66 +14,174 @@
 #include "navswitch.h"
 
 /**
- * All tetris pieces and their rotations
- * Positions are relative, centered around a point (see image: https://cdn.harddrop.com/1/17/SRS-true-rotations.png)
- * Left=Negative, Right=Positive, Up=Negative, Down=Positive
+ * Precalculated tetris pieces and their rotations. (see image: https://harddrop.com/wiki/File:SRS-pieces.png)
+ * Every piece always has exactly 4 points, so we define each piece on a 4x4 grid.
+ * This fits nicely (4x4 = 16 bits) into a uint16_t.
  */
-const tinygl_point_t pieces[PIECES_COUNT][PIECE_NUM_ROTATIONS][PIECE_NUM_POINTS] = {
+
+// Simply combines 4 params (each param should just be be 4 bits) into a single binary string, for easier visualation.
+#define BINARY(a, b, c, d) 0b##a##b##c##d
+const uint16_t pieces[PIECES_COUNT][PIECE_NUM_ROTATIONS] = {
 
     // I Piece
     {
-        { {-1, 0}, {0, 0}, {1, 0}, {2, 0} },
-        { {0, -1}, {0, 0}, {0, 1}, {0, 2} },
-        { {-2, 0}, {-1, 0}, {0, 0}, {1, 0} },
-        { {0, -2}, {0, -1}, {0, 0}, {0, 1} },
+        BINARY( 0000,
+                1111,
+                0000,
+                0000),
+        
+        BINARY( 0010,
+                0010,
+                0010,
+                0010),
+
+        BINARY( 0000,
+                0000,
+                1111,
+                0000),
+
+        BINARY( 0100,
+                0100,
+                0100,
+                0100),
     },
 
     // J Piece
     {
-        { {-1, -1}, {-1, 0}, {0, 0}, {1, 0} },
-        { {1, -1}, {0, -1}, {0, 0}, {0, 1} },
-        { {-1, 0}, {0, 0}, {1, 0}, {1, 1} },
-        { {-1, 1}, {0, 1}, {0, 0}, {0, -1} },
+        BINARY( 1000,
+                1110,
+                0000,
+                0000),
+        
+        BINARY( 0110,
+                0100,
+                0100,
+                0000),
+
+        BINARY( 0000,
+                1110,
+                0010,
+                0000),
+
+        BINARY( 0100,
+                0100,
+                1100,
+                0000),
     },
 
     // L Piece
     {
-        { {-1, 0}, {0, 0}, {1, 0}, {1, -1} },
-        { {0, 1}, {0, 0}, {0, -1}, {1, 1} },
-        { {-1, 1}, {-1, 0}, {0, 0}, {1, 0} },
-        { {-1, -1}, {0, -1}, {0, 0}, {0, 1} },
-    },
+        BINARY( 0010,
+                1110,
+                0000,
+                0000),
+        
+        BINARY( 0100,
+                0100,
+                0110,
+                0000),
 
-    // O (Square) Piece
+        BINARY( 0000,
+                1110,
+                1000,
+                0000),
+
+        BINARY( 1100,
+                0100,
+                0100,
+                0000),
+    },
+    
+    // O Piece
     {
-        { {0, 0}, {0, -1}, {1, -1}, {1, 0} },
-        { {0, 0}, {0, -1}, {1, -1}, {1, 0} },
-        { {0, 0}, {0, -1}, {1, -1}, {1, 0} },
-        { {0, 0}, {0, -1}, {1, -1}, {1, 0} },
+        BINARY( 0110,
+                0110,
+                0000,
+                0000),
+
+        BINARY( 0110,
+                0110,
+                0000,
+                0000),
+
+        BINARY( 0110,
+                0110,
+                0000,
+                0000),
+
+        BINARY( 0110,
+                0110,
+                0000,
+                0000),
     },
 
     // S Piece
     {
-        { {-1, 0}, {0, 0}, {0, -1}, {1, -1} },
-        { {0, -1}, {0, 0}, {1, 0}, {1, 1} },
-        { {-1, 1}, {0, 1}, {0, 0}, {1, 0} },
-        { {-1, 0}, {-1, -1}, {0, 0}, {0, 1} },
+        BINARY( 0110,
+                1100,
+                0000,
+                0000),
+        
+        BINARY( 0100,
+                0110,
+                0010,
+                0000),
+
+        BINARY( 0000,
+                0110,
+                1100,
+                0000),
+
+        BINARY( 1000,
+                1100,
+                0100,
+                0000),
     },
 
     // T Piece
     {
-        { {-1, 0}, {0, 0}, {0, -1}, {1, 0} },
-        { {0, -1}, {0, 0}, {0, 1}, {1, 0} },
-        { {-1, 0}, {0, 0}, {1, 0}, {0, 1} },
-        { {-1, 0}, {0, 0}, {0, -1}, {0, 1} },
+        BINARY( 0100,
+                1110,
+                0000,
+                0000),
+        
+        BINARY( 0100,
+                0110,
+                0100,
+                0000),
+
+        BINARY( 0000,
+                1110,
+                0100,
+                0000),
+
+        BINARY( 0100,
+                1100,
+                0100,
+                0000),
     },
 
     // Z Piece
     {
-        { {-1, -1}, {0, -1}, {0, 0}, {1, 0} },
-        { {0, 1}, {0, 0}, {1, 0}, {1, -1} },
-        { {-1, 0}, {0, 0}, {0, 1}, {1, 1} },
-        { {-1, 0}, {-1, 1}, {0, 0}, {0, -1} },
+        BINARY( 1100,
+                0110,
+                0000,
+                0000),
+        
+        BINARY( 0010,
+                0110,
+                0100,
+                0000),
+
+        BINARY( 0000,
+                1100,
+                0110,
+                0000),
+
+        BINARY( 0100,
+                1100,
+                1000,
+                0000),
     },
 };
 
@@ -91,8 +199,8 @@ bool piece_generate_next(piece_t** current_piece)
     piece->id = _nextPieceId;
     piece->orientation = ORIENTATION_NORTH;
     piece->pos = (tinygl_point_t){
-        .x = TINYGL_WIDTH / 2, // spawn piece initially in center
-        .y = 1
+        .x = 1, // offset by 1 so pieces spawn centered 
+        .y = 0
     };
 
     _nextPieceId = (_nextPieceId + 1) % ARRAY_SIZE(pieces);
@@ -108,9 +216,36 @@ bool piece_generate_next(piece_t** current_piece)
     return valid_pos;
 }
 
-const tinygl_point_t* piece_get_points(piece_t* piece, orientation_t orientation)
+const tinygl_point_t* piece_get_points(piece_t* piece, uint8_t x, uint8_t y, orientation_t orientation)
 {
-    return pieces[piece->id][orientation];
+    static tinygl_point_t points[PIECE_NUM_POINTS];
+    uint16_t pattern = pieces[piece->id][orientation];
+
+    // As stated above, each tetris piece is defined on a 4x4 grid.
+    // We start with the left most bit, and continually shift it to the right, to test if the bit
+    // in the given position is 1, indicating a point.
+    // think of this uint16_t as groupings of 4 bits: 4 columns and 4 rows (see how the pieces array is defined)
+        
+    uint16_t test_bit = 0b1000000000000000;
+    
+    uint8_t i = 0;
+    for (uint8_t column = 0; column < PIECE_GRID_SIZE; column++)
+    {
+        for (uint8_t row = 0; row < PIECE_GRID_SIZE; row++)
+        {
+            // there is a 1 in this bit pos
+            if (pattern & test_bit)
+            {
+                points[i].x = row + x;
+                points[i].y = column + y;
+                i++;
+            }
+
+            test_bit >>= 1;
+        }
+    }
+
+    return points;
 }
 
 bool piece_rotate(piece_t *piece)
@@ -166,12 +301,10 @@ bool piece_move(piece_t *piece, direction_t direction)
 
 void piece_draw(piece_t* piece)
 {
-    const tinygl_point_t* points = piece_get_points(piece, piece->orientation);
+    const tinygl_point_t* points = piece_get_points(piece, piece->pos.x, piece->pos.y, piece->orientation);
     for (uint8_t i = 0; i < PIECE_NUM_POINTS; i++)
     {
         tinygl_point_t point = points[i];
-        point.x += piece->pos.x;
-        point.y += piece->pos.y;
         tinygl_draw_point(point, 1);
     }
 }
