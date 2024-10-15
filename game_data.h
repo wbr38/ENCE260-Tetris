@@ -24,7 +24,13 @@ typedef struct {
     uint8_t rng_seed;
     board_t* board;
     piece_t* current_piece;
-    uint8_t num_lines_cleared;
+    
+    /** the total number of lines we have cleared */
+    uint8_t our_lines_cleared;
+
+    /** the total number of lines the other player has cleared */
+    uint8_t their_lines_cleared;
+
     bool game_paused;
 } game_data_t;
 

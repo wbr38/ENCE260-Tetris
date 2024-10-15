@@ -25,7 +25,8 @@
 #define BUTTON_TASK_FREQ 100
 #define DISPLAY_TASK_FREQ 300
 #define IR_TASK_FREQ 100
-#define BOARD_MOVE_DOWN_FREQ 1 /* 1s */
+#define LED_FLASH_TASK_FREQ 8   // 1/8 -> 0.125ms
+#define BOARD_MOVE_DOWN_FREQ 1  // 1s
 
 static void handle_packet(packet_t packet) 
 {
@@ -70,7 +71,8 @@ static void handle_packet(packet_t packet)
     
     case LINE_CLEAR_PACKET:
         {
-            // TODO
+            uint8_t num_cleared = packet.data;
+            game_data->their_lines_cleared = num_cleared;
             break;
         }
 
@@ -265,6 +267,29 @@ static void ir_update_task(__unused__ void *data)
     handle_packet(packet);
 }
 
+/** Used to flash the blue LED when the other board has cleared a number of lines. */
+static void led_flash_task(__unused__ void *data)
+{
+    // each alternating call of this task just sets the LED to false and does nothing else
+    // this gives the flash effect
+    static bool toggle = false;
+    toggle = !toggle;
+    if (toggle)
+    {
+        led_set(LED1, false);
+        return;
+    }
+
+    // Check if there are 
+    // Check if the other player has cleared more lines since the last time this task ran
+    static uint8_t num_flashed = 0;
+    if (num_flashed < game_data->their_lines_cleared)
+    {
+        led_set(LED1, true);
+        num_flashed++;
+    }
+}
+
 int main(void)
 {
     system_init();
@@ -284,7 +309,8 @@ int main(void)
             {.func = display_task, .period = TASK_RATE / DISPLAY_TASK_FREQ},
             {.func = button_task, .period = TASK_RATE / BUTTON_TASK_FREQ},
             {.func = board_move_down_task, .period = TASK_RATE /  BOARD_MOVE_DOWN_FREQ},
-            {.func = ir_update_task, .period = TASK_RATE /  IR_TASK_FREQ}
+            {.func = ir_update_task, .period = TASK_RATE /  IR_TASK_FREQ},
+            {.func = led_flash_task, .period = TASK_RATE /  LED_FLASH_TASK_FREQ}
         };
 
     task_schedule(tasks, ARRAY_SIZE(tasks));

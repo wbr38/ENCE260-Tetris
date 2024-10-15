@@ -92,13 +92,13 @@ void board_place_piece(board_t* board, piece_t* piece)
         board->tiles[point.x][point.y] = true;
     }
 
-    uint8_t num_lines_cleared = board_clear_lines(board);
-    game_data->num_lines_cleared += num_lines_cleared;
+    uint8_t lines_cleared = board_clear_lines(board);
+    game_data->our_lines_cleared += lines_cleared;
 
     // send Line Clear Packet to other board
     packet_t line_clear_packet = {
         .id = LINE_CLEAR_PACKET,
-        .data = num_lines_cleared
+        .data = lines_cleared
     };
     packet_send(line_clear_packet);
 }
