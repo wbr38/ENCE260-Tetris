@@ -269,8 +269,9 @@ int main(void)
 {
     system_init();
     ir_uart_init();
-    led_init();
     button_init();
+    led_init();
+    led_set(LED1, false);
 
     game_data_init();
 

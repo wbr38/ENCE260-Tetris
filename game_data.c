@@ -12,5 +12,6 @@ void game_data_init()
     game_data->rng_seed = 0;
     game_data->board = board_init();
     piece_generate_next(&game_data->current_piece);
+    game_data->num_lines_cleared = 0;
     game_data->game_paused = false;
 }

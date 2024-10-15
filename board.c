@@ -5,6 +5,9 @@
  */
 
 #include "board.h"
+#include "packet.h"
+#include "game_data.h"
+
 #include <string.h>
 
 board_t* board_init(void)
@@ -39,6 +42,44 @@ bool board_valid_position(board_t* board, piece_t* piece, uint8_t x, uint8_t y, 
     return true;
 }
 
+/** Shift all the rows above the given `row` down */
+void board_shift_down(board_t* board, uint8_t row)
+{
+    for (uint8_t y = row; y > 0; y--)
+        for (uint8_t x = 0; x < TINYGL_WIDTH; x++)
+            board->tiles[x][y] = board->tiles[x][y - 1];
+}
+
+/**
+ * @brief Checks and clears any rows that are full. Shifts the board's points appropriately.
+ * @param board 
+ * @return uint8_t The number of lines cleared
+ */
+uint8_t board_clear_lines(board_t* board)
+{
+    uint8_t num_clears = 0;
+    for (uint8_t y = 0; y < TINYGL_HEIGHT; y++)
+    {
+        bool full_row = true;
+        for (uint8_t x = 0; x < TINYGL_WIDTH; x++)
+        {
+            if (!board->tiles[x][y])
+            {
+                full_row = false;
+                break;
+            }
+        }
+
+        if (full_row)
+        {
+            board_shift_down(board, y);
+            num_clears++;
+        }
+    }
+
+    return num_clears;
+}
+
 void board_place_piece(board_t* board, piece_t* piece)
 {
     const tinygl_point_t* points = piece_get_points(piece, piece->orientation);
@@ -50,4 +91,14 @@ void board_place_piece(board_t* board, piece_t* piece)
         point.y += piece->pos.y;
         board->tiles[point.x][point.y] = true;
     }
+
+    uint8_t num_lines_cleared = board_clear_lines(board);
+    game_data->num_lines_cleared += num_lines_cleared;
+
+    // send Line Clear Packet to other board
+    packet_t line_clear_packet = {
+        .id = LINE_CLEAR_PACKET,
+        .data = num_lines_cleared
+    };
+    packet_send(line_clear_packet);
 }

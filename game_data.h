@@ -24,6 +24,7 @@ typedef struct {
     uint8_t rng_seed;
     board_t* board;
     piece_t* current_piece;
+    uint8_t num_lines_cleared;
     bool game_paused;
 } game_data_t;
 
