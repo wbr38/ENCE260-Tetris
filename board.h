@@ -17,10 +17,8 @@ typedef struct {
     bool tiles[TINYGL_WIDTH][TINYGL_HEIGHT];
 } board_t;
 
-extern board_t* board;
-
-/** Initialises the global `board` object. */
-void board_init(void);
+/** Returns a new board object */
+board_t* board_init(void);
 
 /** Place this tetris piece at its current position on the board. */
 void board_place_piece(board_t* board, piece_t* piece);

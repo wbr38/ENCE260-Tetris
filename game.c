@@ -9,6 +9,7 @@
 #include "piece.h"
 #include "board.h"
 #include "packet.h"
+#include "game_data.h"
 
 // API
 #include "system.h"
@@ -26,7 +27,6 @@
 #define IR_TASK_FREQ 100
 #define BOARD_MOVE_DOWN_FREQ 1 /* 1s */
 
-static bool game_over = false;
 static void handle_packet(packet_t packet) 
 {
     switch (packet.id)
@@ -91,20 +91,24 @@ static void handle_packet(packet_t packet)
     }
 }
 
-static void button_task_init(void)
-{
-    button_init();
-}
-
 static void button_task(__unused__ void *data)
 {
+    button_update();
+
+    // TODO: Switch case
+    if (game_data->game_state == GAME_STATE_MAIN_MENU)
+    {
+        if (button_push_event_p(BUTTON1))
+            game_data->game_state = GAME_STATE_PLAYING;
+
+        return;
+    }
+
     // Button 1
     {
-        button_update();
-        
         // TODO: Testing code, remove later
         if (button_push_event_p(BUTTON1))
-            piece_rotate(current_piece);
+            piece_rotate(game_data->current_piece);
 
         if (button_push_event_p(BUTTON1))
         {
@@ -131,23 +135,23 @@ static void button_task(__unused__ void *data)
         // TODO: Testing code, remove later
         if (navswitch_push_event_p(NAVSWITCH_PUSH))
         {
-            board_place_piece(board, current_piece);
-            piece_generate_next();
+            board_place_piece(game_data->board, game_data->current_piece);
+            piece_generate_next(&game_data->current_piece);
         }
 
         // TODO: Remove after testing
         if (navswitch_push_event_p(NAVSWITCH_NORTH))
-            piece_move(current_piece, DIRECTION_UP);
+            piece_move(game_data->current_piece, DIRECTION_UP);
 
         // Move current piece
         if (navswitch_push_event_p(NAVSWITCH_EAST))
-            piece_move(current_piece, DIRECTION_RIGHT);
+            piece_move(game_data->current_piece, DIRECTION_RIGHT);
 
         if (navswitch_push_event_p(NAVSWITCH_WEST))
-            piece_move(current_piece, DIRECTION_LEFT);
+            piece_move(game_data->current_piece, DIRECTION_LEFT);
 
         if (navswitch_push_event_p(NAVSWITCH_SOUTH))
-            piece_move(current_piece, DIRECTION_DOWN);
+            piece_move(game_data->current_piece, DIRECTION_DOWN);
     }
 }
 
@@ -160,85 +164,92 @@ static void display_task_init(void)
     // tinygl_text("Hello, World!");
 }
 
-void screen_clear(void)
-{
-    for (int x = 0; x < TINYGL_WIDTH; x++)
-    {
-        for (int y = 0; y < TINYGL_HEIGHT; y++)
-        {
-            tinygl_point_t point = { x, y };
-            tinygl_draw_point(point, 0);
-        }
-    }
-}
-
-static void game_over_screen(__unused__ void *data)
-{
-    static bool game_over_init = false;
-    if (!game_over_init)
-    {
-        screen_clear();
-        tinygl_text("Game Over");
-        game_over_init = true;
-    }
-
-    tinygl_update();
-}
-
 static void display_task(__unused__ void *data)
 {
-    // TODO: Use an enum for the current game state
-    if (game_over)
+    switch (game_data->game_state)
     {
-        game_over_screen(data);
-        return;
-    }
-
-    // Clear screen
-    screen_clear();
-
-    // draw placed board points
-    for (int x = 0; x < TINYGL_WIDTH; x++)
-    {
-        for (int y = 0; y < TINYGL_HEIGHT; y++)
+    case GAME_STATE_MAIN_MENU:
         {
-            if (board->tiles[x][y])
+            static bool init = false;
+            if (!init)
             {
-                tinygl_point_t point = { x, y };
-                tinygl_draw_point(point, 1);
+                tinygl_text("Tetris");
+                init = true;
             }
+            break;
         }
+
+    case GAME_STATE_PLAYING:
+        {
+            tinygl_clear();
+
+            // draw placed board points
+            for (int8_t x = 0; x < TINYGL_WIDTH; x++)
+            {
+                for (int8_t y = 0; y < TINYGL_HEIGHT; y++)
+                {
+                    if (game_data->board->tiles[x][y])
+                    {
+                        tinygl_point_t point = { x, y };
+                        tinygl_draw_point(point, 1);
+                    }
+                }
+            }
+
+            piece_draw(game_data->current_piece);
+            break;
+        }
+
+    case GAME_STATE_DEAD:
+        {
+            static bool game_over_init = false;
+            if (!game_over_init)
+            {
+                tinygl_clear();
+                tinygl_text("Game Over");
+                game_over_init = true;
+            }
+            break;
+        }
+    
+    default:
+        break;
     }
 
-    piece_draw(current_piece);
     tinygl_update();
 }
 
+/**
+ * Used to move the current piece down automatically.
+ * Will place the piece on the board if there is nowhere to move down,
+ * and will spawn the next piece to be placed.
+ */
 static void board_move_down_task(__unused__ void *data)
 {
-    if (game_over)
+    if (game_data->game_state != GAME_STATE_PLAYING)
         return;
 
     // Detect when a new piece has been spawned, skip moving for this iteration
     // so the piece isn't moved down immediately as soon as it's spawnedk
     static piece_t* old_piece = 0;
-    if (old_piece != current_piece)
+    if (old_piece != game_data->current_piece)
     {
-        old_piece = current_piece;
+        old_piece = game_data->current_piece;
         return;
     }
 
-    bool was_moved = piece_move(current_piece, DIRECTION_DOWN);
+    bool was_moved = piece_move(game_data->current_piece, DIRECTION_DOWN);
 
     // piece was not able to be moved down, so we place this piece on the board at the current location
     // and spawn the next piece
     if (!was_moved)
     {
-        board_place_piece(board, current_piece);
-        bool valid_pos = piece_generate_next();
+        board_place_piece(game_data->board, game_data->current_piece);
+        bool valid_pos = piece_generate_next(&game_data->current_piece);
         if (!valid_pos)
-            game_over = true;
+            game_data->game_state = GAME_STATE_DEAD;
     }
+
 }
 
 static void ir_update_task(__unused__ void *data)
@@ -256,13 +267,12 @@ int main(void)
     system_init();
     ir_uart_init();
     led_init();
+    button_init();
 
-    board_init();
-    piece_generate_next();
+    game_data_init();
 
     // Task init
     display_task_init();
-    button_task_init();
 
     // Run tasks
     task_t tasks[] =

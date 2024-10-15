@@ -7,12 +7,11 @@
 #include "board.h"
 #include <string.h>
 
-board_t* board = 0;
-
-void board_init(void)
+board_t* board_init(void)
 {
-    board = malloc(sizeof(board_t));
+    board_t* board = malloc(sizeof(board_t));
     memset(board, 0, sizeof(board_t));
+    return board;
 }
 
 bool board_valid_position(board_t* board, piece_t* piece, uint8_t x, uint8_t y, orientation_t orientation)

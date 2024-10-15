@@ -6,13 +6,12 @@
 
 #include "piece.h"
 #include "board.h"
+#include "game_data.h"
 
 #include <string.h>
 #include <stdlib.h>
 
 #include "navswitch.h"
-
-piece_t* current_piece = 0; 
 
 /**
  * All tetris pieces and their rotations
@@ -78,19 +77,20 @@ const tinygl_point_t pieces[PIECES_COUNT][PIECE_NUM_ROTATIONS][PIECE_NUM_POINTS]
     },
 };
 
-bool piece_generate_next()
+bool piece_generate_next(piece_t** current_piece)
 {
     static uint8_t _nextPieceId = 0;
 
-    if (current_piece == NULL)
-        current_piece = malloc(sizeof(piece_t));
+    if (*current_piece == NULL)
+        *current_piece = malloc(sizeof(piece_t));
 
-    memset(current_piece, 0, sizeof(piece_t));
+    piece_t* piece = *current_piece;
+    memset(piece, 0, sizeof(piece_t));
 
     // set values
-    current_piece->id = _nextPieceId;
-    current_piece->orientation = ORIENTATION_NORTH;
-    current_piece->pos = (tinygl_point_t){
+    piece->id = _nextPieceId;
+    piece->orientation = ORIENTATION_NORTH;
+    piece->pos = (tinygl_point_t){
         .x = TINYGL_WIDTH / 2, // spawn piece initially in center
         .y = 1
     };
@@ -98,7 +98,13 @@ bool piece_generate_next()
     _nextPieceId = (_nextPieceId + 1) % ARRAY_SIZE(pieces);
 
     // check if the new current_piece pos is valid
-    bool valid_pos = board_valid_position(board, current_piece, current_piece->pos.x, current_piece->pos.y, current_piece->orientation);
+    bool valid_pos = board_valid_position(
+        game_data->board,
+        piece,
+        piece->pos.x,
+        piece->pos.y,
+        piece->orientation
+    );
     return valid_pos;
 }
 
@@ -111,7 +117,7 @@ bool piece_rotate(piece_t *piece)
 {
     orientation_t new_orientation = (piece->orientation + 1) % PIECE_NUM_ROTATIONS;
 
-    bool is_valid = board_valid_position(board, piece, piece->pos.x, piece->pos.y, new_orientation);
+    bool is_valid = board_valid_position(game_data->board, piece, piece->pos.x, piece->pos.y, new_orientation);
     if (!is_valid)
         return false;
 
@@ -121,8 +127,8 @@ bool piece_rotate(piece_t *piece)
 
 bool piece_move(piece_t *piece, direction_t direction)
 {
-    int x = piece->pos.x;
-    int y = piece->pos.y;
+    int8_t x = piece->pos.x;
+    int8_t y = piece->pos.y;
 
     switch (direction)
     {
@@ -149,7 +155,7 @@ bool piece_move(piece_t *piece, direction_t direction)
 
     // Check this new position is valid
     // TODO: Try to "kick" the piece into place
-    bool is_valid = board_valid_position(board, piece, x, y, piece->orientation);
+    bool is_valid = board_valid_position(game_data->board, piece, x, y, piece->orientation);
     if (!is_valid)
         return false;
 
