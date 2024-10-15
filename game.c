@@ -157,9 +157,12 @@ static void button_task(__unused__ void *data)
 
 static void display_task_init(void)
 {
+    #define TINYGL_SPEED 25
+
     tinygl_init(DISPLAY_TASK_FREQ);
     tinygl_font_set(&font5x7_1);
     tinygl_text_mode_set(TINYGL_TEXT_MODE_SCROLL);
+    tinygl_text_speed_set(TINYGL_SPEED);
     tinygl_text_dir_set(TINYGL_TEXT_DIR_NORMAL);
     // tinygl_text("Hello, World!");
 }
@@ -173,7 +176,7 @@ static void display_task(__unused__ void *data)
             static bool init = false;
             if (!init)
             {
-                tinygl_text("Tetris");
+                tinygl_text(" Tetris");
                 init = true;
             }
             break;
@@ -206,7 +209,7 @@ static void display_task(__unused__ void *data)
             if (!game_over_init)
             {
                 tinygl_clear();
-                tinygl_text("Game Over");
+                tinygl_text(" Game Over");
                 game_over_init = true;
             }
             break;
