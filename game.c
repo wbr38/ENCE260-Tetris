@@ -6,86 +6,76 @@
 
 #include <stdbool.h>
 
-#include "piece.h"
 #include "board.h"
-#include "packet.h"
 #include "game_data.h"
+#include "packet.h"
+#include "piece.h"
 
-// API
-#include "system.h"
-#include "button.h"
-#include "led.h"
-#include "task.h"
-#include "tinygl.h"
-#include "navswitch.h"
-#include "font5x7_1.h"
-#include "ir_uart.h"
+// API headers
+#include <button.h>
+#include <font5x7_1.h>
+#include <ir_uart.h>
+#include <led.h>
+#include <navswitch.h>
+#include <system.h>
+#include <task.h>
+#include <tinygl.h>
 
 // Task frequency (in Hz)
-#define BUTTON_TASK_FREQ 100
-#define DISPLAY_TASK_FREQ 300
-#define IR_TASK_FREQ 100
-#define LED_FLASH_TASK_FREQ 8   // 1/8 -> 0.125ms
+#define BUTTON_TASK_FREQ     100
+#define DISPLAY_TASK_FREQ    300
+#define IR_TASK_FREQ         100
+#define LED_FLASH_TASK_FREQ  8  // 1/8 -> 0.125ms
 #define BOARD_MOVE_DOWN_FREQ 1  // 1s
 
-static void handle_packet(packet_t packet) 
+// Constants
+#define TINYGL_SPEED 25
+
+/**
+ * Task to poll the push button and nav switch controls
+ */
+static void button_task(__unused__ void* data)
 {
-    switch (packet.id)
+    button_update();
+    navswitch_update();
+
+    switch (game_data->game_state)
     {
-    case PAIRING_PACKET:
+    case GAME_STATE_MAIN_MENU:
         {
-            // recvd pairing packet, set the rng_seed and respond
-            // uint8_t rng_seed = packet.data;
+            if (button_push_event_p(BUTTON1))
+                game_data->game_state = GAME_STATE_PLAYING;
 
-            packet_t ack = {
-                .id = PAIRING_ACK_PACKET,
-                .data = 0
-            };
-
-            packet_send(ack);
-            // TODO: start 3 2 1 countdown
-            break;
+            return;
         }
 
-    case PAIRING_ACK_PACKET:
+    case GAME_STATE_PLAYING:
         {
-            // recvd pairing ack. maybe have a check to confirm we actuall sent a pairing packet
-            // otherwise start 3 2 1 countdown
-            break;
-        }
+            if (button_push_event_p(BUTTON1))
+                piece_rotate(game_data->current_piece);
 
-    case PING_PACKET:
-        {
-            // todo
-            // maybe we agree that whoever sent the Pairing packet should be the one sending the Ping packet
-            // the other board only sends pong
-            // that way each board knows which packet to expect and recv
-            break;
-        }
+            // TODO: Testing code, remove later
+            if (navswitch_push_event_p(NAVSWITCH_PUSH))
+            {
+                board_place_piece(game_data->board, game_data->current_piece);
+                piece_generate_next(&game_data->current_piece);
+            }
 
-    case PONG_PACKET:
-        {
-            // todo
-            break;
-        }
-    
-    case LINE_CLEAR_PACKET:
-        {
-            uint8_t num_cleared = packet.data;
-            game_data->their_lines_cleared = num_cleared;
-            break;
-        }
+            // TODO: Remove after testing
+            if (navswitch_push_event_p(NAVSWITCH_NORTH))
+                piece_move(game_data->current_piece, DIRECTION_UP);
 
-    case DIE_PACKET:
-        {
-            // TODO
-            break;
-        }
+            // Move current piece
+            if (navswitch_push_event_p(NAVSWITCH_EAST))
+                piece_move(game_data->current_piece, DIRECTION_RIGHT);
 
-    case DIE_ACK_PACKET:
-        {
-            // TODO
-            break;
+            if (navswitch_push_event_p(NAVSWITCH_WEST))
+                piece_move(game_data->current_piece, DIRECTION_LEFT);
+
+            if (navswitch_push_event_p(NAVSWITCH_SOUTH))
+                piece_move(game_data->current_piece, DIRECTION_DOWN);
+
+            return;
         }
 
     default:
@@ -93,83 +83,10 @@ static void handle_packet(packet_t packet)
     }
 }
 
-static void button_task(__unused__ void *data)
-{
-    button_update();
-
-    // TODO: Switch case
-    if (game_data->game_state == GAME_STATE_MAIN_MENU)
-    {
-        if (button_push_event_p(BUTTON1))
-            game_data->game_state = GAME_STATE_PLAYING;
-
-        return;
-    }
-
-    // Button 1
-    {
-        // TODO: Testing code, remove later
-        if (button_push_event_p(BUTTON1))
-            piece_rotate(game_data->current_piece);
-
-        if (button_push_event_p(BUTTON1))
-        {
-            packet_t packet = {
-                .id = PING_PACKET,
-                .data = 'B' - 'A'
-            };
-            handle_packet(packet);
-        }
-        else if (button_release_event_p(BUTTON1))
-        {
-            packet_t packet = {
-                .id = PONG_PACKET,
-                .data = 'B' - 'A'
-            };
-            handle_packet(packet);
-        }
-    }
-
-    // Nav Switch
-    {
-        navswitch_update ();
-
-        // TODO: Testing code, remove later
-        if (navswitch_push_event_p(NAVSWITCH_PUSH))
-        {
-            board_place_piece(game_data->board, game_data->current_piece);
-            piece_generate_next(&game_data->current_piece);
-        }
-
-        // TODO: Remove after testing
-        if (navswitch_push_event_p(NAVSWITCH_NORTH))
-            piece_move(game_data->current_piece, DIRECTION_UP);
-
-        // Move current piece
-        if (navswitch_push_event_p(NAVSWITCH_EAST))
-            piece_move(game_data->current_piece, DIRECTION_RIGHT);
-
-        if (navswitch_push_event_p(NAVSWITCH_WEST))
-            piece_move(game_data->current_piece, DIRECTION_LEFT);
-
-        if (navswitch_push_event_p(NAVSWITCH_SOUTH))
-            piece_move(game_data->current_piece, DIRECTION_DOWN);
-    }
-}
-
-static void display_task_init(void)
-{
-    #define TINYGL_SPEED 25
-
-    tinygl_init(DISPLAY_TASK_FREQ);
-    tinygl_font_set(&font5x7_1);
-    tinygl_text_mode_set(TINYGL_TEXT_MODE_SCROLL);
-    tinygl_text_speed_set(TINYGL_SPEED);
-    tinygl_text_dir_set(TINYGL_TEXT_DIR_NORMAL);
-    // tinygl_text("Hello, World!");
-}
-
-static void display_task(__unused__ void *data)
+/**
+ * Task to update the LED matrix display.
+ */
+static void display_task(__unused__ void* data)
 {
     switch (game_data->game_state)
     {
@@ -195,7 +112,7 @@ static void display_task(__unused__ void *data)
                 {
                     if (game_data->board->tiles[x][y])
                     {
-                        tinygl_point_t point = { x, y };
+                        tinygl_point_t point = {x, y};
                         tinygl_draw_point(point, 1);
                     }
                 }
@@ -216,7 +133,7 @@ static void display_task(__unused__ void *data)
             }
             break;
         }
-    
+
     default:
         break;
     }
@@ -225,11 +142,10 @@ static void display_task(__unused__ void *data)
 }
 
 /**
- * Used to move the current piece down automatically.
- * Will place the piece on the board if there is nowhere to move down,
- * and will spawn the next piece to be placed.
+ * Used to move the current piece down automatically. Will place the piece on
+ * the board if there is nowhere to move down, and will spawn the next piece to be placed.
  */
-static void board_move_down_task(__unused__ void *data)
+static void board_move_down_task(__unused__ void* data)
 {
     if (game_data->game_state != GAME_STATE_PLAYING)
         return;
@@ -254,21 +170,25 @@ static void board_move_down_task(__unused__ void *data)
         if (!valid_pos)
             game_data->game_state = GAME_STATE_DEAD;
     }
-
 }
 
-static void ir_update_task(__unused__ void *data)
+/**
+ * Task to handle any IR packets that have been received.
+ */
+static void ir_update_task(__unused__ void* data)
 {
     packet_t packet;
     bool recvd_packet = packet_get(&packet);
     if (!recvd_packet)
         return;
-    
+
     handle_packet(packet);
 }
 
-/** Used to flash the blue LED when the other board has cleared a number of lines. */
-static void led_flash_task(__unused__ void *data)
+/**
+ * Task used to flash the blue LED when the other board has cleared a number of lines.
+ */
+static void led_flash_task(__unused__ void* data)
 {
     // each alternating call of this task just sets the LED to false and does nothing else
     // this gives the flash effect
@@ -280,7 +200,6 @@ static void led_flash_task(__unused__ void *data)
         return;
     }
 
-    // Check if there are 
     // Check if the other player has cleared more lines since the last time this task ran
     static uint8_t num_flashed = 0;
     if (num_flashed < game_data->their_lines_cleared)
@@ -290,28 +209,41 @@ static void led_flash_task(__unused__ void *data)
     }
 }
 
-int main(void)
+/**
+ * Initialise the ucfk4 system and components
+ */
+static inline void environment_init(void)
 {
+    // misc api
     system_init();
     ir_uart_init();
     button_init();
+
     led_init();
     led_set(LED1, false);
 
-    game_data_init();
+    // display
+    tinygl_init(DISPLAY_TASK_FREQ);
+    tinygl_font_set(&font5x7_1);
+    tinygl_text_mode_set(TINYGL_TEXT_MODE_SCROLL);
+    tinygl_text_speed_set(TINYGL_SPEED);
+    tinygl_text_dir_set(TINYGL_TEXT_DIR_NORMAL);
+}
 
-    // Task init
-    display_task_init();
+int main(void)
+{
+    environment_init();
+    game_data_init();
 
     // Run tasks
     task_t tasks[] =
         {
-            {.func = display_task, .period = TASK_RATE / DISPLAY_TASK_FREQ},
-            {.func = button_task, .period = TASK_RATE / BUTTON_TASK_FREQ},
-            {.func = board_move_down_task, .period = TASK_RATE /  BOARD_MOVE_DOWN_FREQ},
-            {.func = ir_update_task, .period = TASK_RATE /  IR_TASK_FREQ},
-            {.func = led_flash_task, .period = TASK_RATE /  LED_FLASH_TASK_FREQ}
-        };
+            {.func = display_task,         .period = TASK_RATE / DISPLAY_TASK_FREQ   },
+            {.func = button_task,          .period = TASK_RATE / BUTTON_TASK_FREQ    },
+            {.func = board_move_down_task, .period = TASK_RATE / BOARD_MOVE_DOWN_FREQ},
+            {.func = ir_update_task,       .period = TASK_RATE / IR_TASK_FREQ        },
+            {.func = led_flash_task,       .period = TASK_RATE / LED_FLASH_TASK_FREQ },
+    };
 
     task_schedule(tasks, ARRAY_SIZE(tasks));
     return 0;

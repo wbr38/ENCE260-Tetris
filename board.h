@@ -9,7 +9,7 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
-#include "tinygl.h"
+#include <tinygl.h>
 
 #include "piece.h"
 
@@ -26,7 +26,7 @@ void board_place_piece(board_t* board, piece_t* piece);
 /**
  * @returns whether the given tetris piece, at the given coordinates and orientation, is at a valid position on the board.
  *          i.e. it does not collide with any placed pieces or extend outside the bounds of the LED display.
- * 
+ *
  * @param board The global `board` object
  * @param piece The piece to check is valid
  * @param x The x coordinate of the piece to test
@@ -34,4 +34,4 @@ void board_place_piece(board_t* board, piece_t* piece);
  * @param orientation The orientation of the piece to test
  */
 bool board_valid_position(board_t* board, piece_t* piece, uint8_t x, uint8_t y, orientation_t orientation);
-#endif // BOARD_H
+#endif  // BOARD_H

@@ -5,10 +5,11 @@
  */
 
 #include "board.h"
-#include "packet.h"
-#include "game_data.h"
 
 #include <string.h>
+
+#include "game_data.h"
+#include "packet.h"
 
 board_t* board_init(void)
 {
@@ -50,7 +51,7 @@ void board_shift_down(board_t* board, uint8_t row)
 
 /**
  * @brief Checks and clears any rows that are full. Shifts the board's points appropriately.
- * @param board 
+ * @param board
  * @return uint8_t The number of lines cleared
  */
 uint8_t board_clear_lines(board_t* board)
@@ -94,7 +95,7 @@ void board_place_piece(board_t* board, piece_t* piece)
     // send Line Clear Packet to other board
     packet_t line_clear_packet = {
         .id = LINE_CLEAR_PACKET,
-        .data = lines_cleared
+        .data = lines_cleared,
     };
     packet_send(line_clear_packet);
 }

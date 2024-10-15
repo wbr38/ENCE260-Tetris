@@ -5,13 +5,13 @@
  */
 
 #include "piece.h"
+
+#include <navswitch.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "board.h"
 #include "game_data.h"
-
-#include <string.h>
-#include <stdlib.h>
-
-#include "navswitch.h"
 
 /**
  * Precalculated tetris pieces and their rotations. (see image: https://harddrop.com/wiki/File:SRS-pieces.png)
@@ -22,6 +22,7 @@
 // Simply combines 4 params (each param should just be be 4 bits) into a single binary string, for easier visualation.
 #define BINARY(a, b, c, d) 0b##a##b##c##d
 const uint16_t pieces[PIECES_COUNT][PIECE_NUM_ROTATIONS] = {
+    // clang-format off
 
     // I Piece
     {
@@ -183,6 +184,8 @@ const uint16_t pieces[PIECES_COUNT][PIECE_NUM_ROTATIONS] = {
                 1000,
                 0000),
     },
+
+    // clang-format on
 };
 
 bool piece_generate_next(piece_t** current_piece)
@@ -199,8 +202,8 @@ bool piece_generate_next(piece_t** current_piece)
     piece->id = _nextPieceId;
     piece->orientation = ORIENTATION_NORTH;
     piece->pos = (tinygl_point_t){
-        .x = 1, // offset by 1 so pieces spawn centered 
-        .y = 0
+        .x = 1,  // offset by 1 so pieces spawn centered
+        .y = 0,
     };
 
     _nextPieceId = (_nextPieceId + 1) % ARRAY_SIZE(pieces);
@@ -211,8 +214,8 @@ bool piece_generate_next(piece_t** current_piece)
         piece,
         piece->pos.x,
         piece->pos.y,
-        piece->orientation
-    );
+        piece->orientation);
+
     return valid_pos;
 }
 
@@ -225,9 +228,9 @@ const tinygl_point_t* piece_get_points(piece_t* piece, uint8_t x, uint8_t y, ori
     // We start with the left most bit, and continually shift it to the right, to test if the bit
     // in the given position is 1, indicating a point.
     // think of this uint16_t as groupings of 4 bits: 4 columns and 4 rows (see how the pieces array is defined)
-        
+
     uint16_t test_bit = 0b1000000000000000;
-    
+
     uint8_t i = 0;
     for (uint8_t column = 0; column < PIECE_GRID_SIZE; column++)
     {
@@ -248,7 +251,7 @@ const tinygl_point_t* piece_get_points(piece_t* piece, uint8_t x, uint8_t y, ori
     return points;
 }
 
-bool piece_rotate(piece_t *piece)
+bool piece_rotate(piece_t* piece)
 {
     orientation_t new_orientation = (piece->orientation + 1) % PIECE_NUM_ROTATIONS;
 
@@ -260,7 +263,7 @@ bool piece_rotate(piece_t *piece)
     return true;
 }
 
-bool piece_move(piece_t *piece, direction_t direction)
+bool piece_move(piece_t* piece, direction_t direction)
 {
     int8_t x = piece->pos.x;
     int8_t y = piece->pos.y;
@@ -294,8 +297,8 @@ bool piece_move(piece_t *piece, direction_t direction)
     if (!is_valid)
         return false;
 
-    piece->pos.x = x;    
-    piece->pos.y = y;    
+    piece->pos.x = x;
+    piece->pos.y = y;
     return true;
 }
 

@@ -1,4 +1,11 @@
+/** @file game_data.c
+ *  @authors William Brown, Matthew Wills
+ *  @date 15 October 2024
+ *  @brief A structure to contain the current state of the game
+ */
+
 #include "game_data.h"
+
 #include <string.h>
 
 game_data_t* game_data;

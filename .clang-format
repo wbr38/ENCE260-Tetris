@@ -1,0 +1,32 @@
+# Base style
+BasedOnStyle: Google
+IndentWidth: 4
+ColumnLimit: 0
+
+# Braces / wrapping
+AlignAfterOpenBracket: AlwaysBreak
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: true
+  AfterEnum: false 
+  AfterFunction: true
+  AfterNamespace: true
+  AfterObjCDeclaration: true
+  AfterStruct: false 
+  AfterUnion: true
+  BeforeCatch: true
+  BeforeElse: true
+  IndentBraces: false
+  BraceWrappingAfterControlStatementStyle: Always 
+
+IndentCaseLabels: false
+IndentCaseBlocks: true
+
+AlignArrayOfStructures: Left
+AlignConsecutiveMacros: Consecutive
+
+DerivePointerAlignment: false
+PointerAlignment: Left
+
+InsertBraces: false
