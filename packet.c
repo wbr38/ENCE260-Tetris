@@ -13,15 +13,16 @@
 // Generate a binary number of n 1s. E.g.: ONES(3) -> 0b111
 #define ONES(n) ((1 << (n)) - 1)
 
-bool packet_decode(uint8_t byte, PacketID* id, uint8_t* data)
+bool packet_decode(uint8_t byte, packet_t* packet)
 {
     // id is the uppber bits, isolate the id by shifting the data bits to the right
-    *id = byte >> PACKET_DATA_LEN;
+    packet->id = byte >> PACKET_DATA_LEN;
 
     // data is the lower bits, mask these to isolate them
-    *data = byte & ONES(PACKET_DATA_LEN);
+    packet->data = byte & ONES(PACKET_DATA_LEN);
 
-    if (*id < 0 || *id >= _PACKET_COUNT)
+    // ignore invalid ID recvd
+    if (packet->id < 0 || packet->id >= _PACKET_COUNT)
         return false;
 
     return true;
@@ -40,7 +41,7 @@ bool packet_get(packet_t* packet)
         return false;
 
     int8_t byte = ir_uart_getc();
-    return packet_decode(byte, &packet->id, &packet->data);
+    return packet_decode(byte, packet);
 }
 
 void packet_send(packet_t packet)

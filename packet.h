@@ -55,7 +55,7 @@ typedef struct {
 bool packet_get(packet_t* packet);
 void packet_send(packet_t packet);
 
-bool packet_decode(uint8_t packet, PacketID* id, uint8_t* data);
+bool packet_decode(uint8_t byte, packet_t* packet);
 uint8_t packet_encode(PacketID id, uint8_t data);
 
 void handle_packet(packet_t packet);
