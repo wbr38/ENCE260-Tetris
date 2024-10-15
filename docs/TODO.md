@@ -1,6 +1,22 @@
 # TODO
 
-- Add IR/packet functionality
+- Add Pairing packet functionality
+    continuously try to receive the pairing packet.
+
+    if we press button1, stop trying to recv pairing packet
+    instead, we send (repeatedly?) send a pairing packet with our RNG seed
+
+    once we recv a PairingAck, begin the game.
+    after that, add functionality for a 321 countdown
+
+- Add Die/DieAck packet
+    probably need another game state
+    DEAD - we are dead, other player still alive so game is ongoing
+    GAME_OVER - both players are dead
+
+- Add Ping Pong
+    Do this later
+
 ```
 
 Packet Structure:
