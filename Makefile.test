@@ -1,43 +1,70 @@
-# File:   Makefile
-# Author: M. P. Hayes, UCECE
+# File:   Makefile.test
+# Author: M. P. Hayes, UCECE, William Brown
 # Date:   11 Sep 2010
-# Descr:  Makefile for game
+# Descr:  test scaffold Makefile
 
-CC = gcc
-CFLAGS = -Wall -Wstrict-prototypes -Wextra -g -I. -I../../utils -I../../drivers -I../../drivers/test
+DEL=rm
 
-DEL = rm
+CC=gcc
+CFLAGS= \
+	-Wall \
+	-Wstrict-prototypes \
+	-Wextra \
+	-g \
+	-I. \
+	-I../../drivers/test \
+	-I../../extra \
+	-I../../utils \
+	-I../../fonts \
+	-I../../drivers
 
+# automatic dependency generation (https://stackoverflow.com/a/10202536/16999526)
+CFLAGS += \
+	-MMD \
+	-MP
 
 # Default target.
-all: game
+all: game 
 
+# Source files
+SRCS=game.c piece.c board.c packet.c game_data.c
 
-# Compile: create object files from C source files.
-game-test.o: game.c ../../drivers/test/system.h
+# from API (and from test scaffold)
+SRCS += \
+		../../drivers/button.c \
+		../../drivers/display.c \
+		../../drivers/led.c \
+       ../../drivers/ledmat.c \
+	   ../../drivers/navswitch.c \
+	   ../../drivers/test/eeprom.c \
+       ../../drivers/test/mgetkey.c \
+	   ../../drivers/test/pio.c \
+	   ../../drivers/test/system.c \
+       ../../drivers/test/timer.c \
+       ../../drivers/test/ir_uart.c \
+	   ../../extra/mmelody.c \
+	   ../../extra/ticker.c \
+       ../../extra/tweeter.c \
+	   ../../utils/font.c \
+	   ../../utils/task.c \
+       ../../utils/tinygl.c \
+	   ../../utils/uint8toa.c
+
+# Object files
+OBJS=$(SRCS:%.c=%-test.o)
+
+# Compile: create object files from C source files and generate dependencies.
+%-test.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
-
-mgetkey-test.o: ../../drivers/test/mgetkey.c ../../drivers/test/mgetkey.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-pio-test.o: ../../drivers/test/pio.c
-	$(CC) -c $(CFLAGS) $< -o $@
-
-system-test.o: ../../drivers/test/system.c ../../drivers/test/avrtest.h ../../drivers/test/mgetkey.h ../../drivers/test/pio.h ../../drivers/test/system.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-
-
 
 # Link: create executable file from object files.
-game: game-test.o mgetkey-test.o pio-test.o system-test.o
-	$(CC) $(CFLAGS) $^ -o $@ -lrt
+game: $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) -o $@ -lrt
 
+# Include automatically generated dependency files, if they exist
+-include $(OBJS:.o=.d)
 
 # Clean: delete derived files.
 .PHONY: clean
-clean: 
-	-$(DEL) game game-test.o mgetkey-test.o pio-test.o system-test.o
-
-
-
+clean:
+	-$(DEL) game $(OBJS) $(OBJS:.o=.d)
