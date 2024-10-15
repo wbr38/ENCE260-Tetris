@@ -82,14 +82,13 @@ bool piece_generate_next()
 {
     static uint8_t _nextPieceId = 0;
 
-    if (current_piece != NULL)
-        free(current_piece);
+    if (current_piece == NULL)
+        current_piece = malloc(sizeof(piece_t));
 
-    current_piece = malloc(sizeof(piece_t));
     memset(current_piece, 0, sizeof(piece_t));
 
     // set values
-    memcpy(current_piece->points, pieces[_nextPieceId], sizeof(current_piece->points));
+    current_piece->id = _nextPieceId;
     current_piece->orientation = ORIENTATION_NORTH;
     current_piece->pos = (tinygl_point_t){
         .x = TINYGL_WIDTH / 2, // spawn piece initially in center
@@ -103,9 +102,9 @@ bool piece_generate_next()
     return valid_pos;
 }
 
-tinygl_point_t* piece_get_points(piece_t* piece, orientation_t orientation)
+const tinygl_point_t* piece_get_points(piece_t* piece, orientation_t orientation)
 {
-    return piece->points[orientation];
+    return pieces[piece->id][orientation];
 }
 
 bool piece_rotate(piece_t *piece)
@@ -161,8 +160,8 @@ bool piece_move(piece_t *piece, direction_t direction)
 
 void piece_draw(piece_t* piece)
 {
-    tinygl_point_t* points = piece_get_points(piece, piece->orientation);
-    for (uint8_t i = 0; i < ARRAY_SIZE(piece->points); i++)
+    const tinygl_point_t* points = piece_get_points(piece, piece->orientation);
+    for (uint8_t i = 0; i < PIECE_NUM_POINTS; i++)
     {
         tinygl_point_t point = points[i];
         point.x += piece->pos.x;

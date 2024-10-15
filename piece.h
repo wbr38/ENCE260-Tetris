@@ -33,7 +33,7 @@ typedef enum
 /** Represents a tetris piece (tetromino) */
 typedef struct
 {
-    tinygl_point_t points[PIECE_NUM_ROTATIONS][PIECE_NUM_POINTS];
+    uint8_t id;
     tinygl_point_t pos;
     orientation_t orientation;
 } piece_t;
@@ -49,7 +49,7 @@ extern piece_t* current_piece;
 bool piece_generate_next(void);
 
 /** Returns a tinygl_point_t array for the given orientation of this piece. */
-tinygl_point_t* piece_get_points(piece_t* piece, orientation_t orientation);
+const tinygl_point_t* piece_get_points(piece_t* piece, orientation_t orientation);
 
 /**
  * @brief Attempt to move the piece in the given direction.

@@ -17,8 +17,8 @@ void board_init(void)
 
 bool board_valid_position(board_t* board, piece_t* piece, uint8_t x, uint8_t y, orientation_t orientation)
 {
-    tinygl_point_t* points = piece_get_points(piece, orientation);
-    for (uint8_t i = 0; i < ARRAY_SIZE(piece->points); i++)
+    const tinygl_point_t* points = piece_get_points(piece, orientation);
+    for (uint8_t i = 0; i < PIECE_NUM_POINTS; i++)
     {
         tinygl_point_t point = points[i];
         point.x += x;
@@ -42,9 +42,9 @@ bool board_valid_position(board_t* board, piece_t* piece, uint8_t x, uint8_t y, 
 
 void board_place_piece(board_t* board, piece_t* piece)
 {
-    tinygl_point_t* points = piece_get_points(piece, piece->orientation);
+    const tinygl_point_t* points = piece_get_points(piece, piece->orientation);
 
-    for (uint8_t i = 0; i < ARRAY_SIZE(piece->points); i++)
+    for (uint8_t i = 0; i < PIECE_NUM_POINTS; i++)
     {
         tinygl_point_t point = points[i];
         point.x += piece->pos.x;
