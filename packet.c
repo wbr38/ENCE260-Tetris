@@ -40,7 +40,7 @@ bool packet_get(packet_t* packet)
     if (!ir_uart_read_ready_p())
         return false;
 
-    int8_t byte = ir_uart_getc();
+    uint8_t byte = ir_uart_getc();
     return packet_decode(byte, packet);
 }
 
@@ -94,7 +94,7 @@ void handle_packet(packet_t packet)
     case LINE_CLEAR_PACKET:
         {
             uint8_t num_cleared = packet.data;
-            game_data->their_lines_cleared = num_cleared;
+            game_data->their_lines_cleared += num_cleared;
             break;
         }
 
