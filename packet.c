@@ -15,11 +15,7 @@
 
 bool packet_decode(uint8_t byte, packet_t* packet)
 {
-    // id is the uppber bits, isolate the id by shifting the data bits to the right
-    packet->id = byte >> PACKET_DATA_LEN;
-
-    // data is the lower bits, mask these to isolate them
-    packet->data = byte & ONES(PACKET_DATA_LEN);
+    packet->raw = byte;
 
     // ignore invalid ID recvd
     if (packet->id < 0 || packet->id >= _PACKET_COUNT)
@@ -28,10 +24,9 @@ bool packet_decode(uint8_t byte, packet_t* packet)
     return true;
 }
 
-uint8_t packet_encode(PacketID id, uint8_t data)
+uint8_t packet_encode(packet_t packet)
 {
-    // shift the id to the upper bits, and combine with the lower data bits
-    return (id << PACKET_DATA_LEN) | (data & ONES(PACKET_DATA_LEN));
+    return packet.raw;
 }
 
 bool packet_get(packet_t* packet)
@@ -46,7 +41,7 @@ bool packet_get(packet_t* packet)
 
 void packet_send(packet_t packet)
 {
-    uint8_t byte = packet_encode(packet.id, packet.data);
+    uint8_t byte = packet_encode(packet);
     ir_uart_putc(byte);
 }
 

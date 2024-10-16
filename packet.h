@@ -47,16 +47,19 @@ typedef enum {
     _PACKET_COUNT,
 } PacketID;
 
-typedef struct {
-    uint8_t data : PACKET_DATA_LEN;
-    uint8_t id : PACKET_ID_LEN;
+typedef union {
+    struct {
+        uint8_t id : PACKET_ID_LEN;
+        uint8_t data : PACKET_DATA_LEN;
+    };
+    uint8_t raw;
 } packet_t;
 
 bool packet_get(packet_t* packet);
 void packet_send(packet_t packet);
 
 bool packet_decode(uint8_t byte, packet_t* packet);
-uint8_t packet_encode(PacketID id, uint8_t data);
+uint8_t packet_encode(packet_t packet);
 
 void handle_packet(packet_t packet);
 #endif  // PACKET_H
