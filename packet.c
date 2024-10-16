@@ -65,7 +65,7 @@ void handle_packet(packet_t packet)
             };
 
             packet_send(ack);
-            // TODO: start 3 2 1 countdown
+            game_data->game_state = GAME_STATE_STARTING;
             break;
         }
 

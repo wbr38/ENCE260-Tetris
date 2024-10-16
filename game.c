@@ -43,27 +43,24 @@ static void button_task(__unused__ void* data)
     {
     case GAME_STATE_MAIN_MENU:
         {
-            if (button_push_event_p(BUTTON1))
-                game_data->game_state = GAME_STATE_PLAYING;
-
+            // Send pairing packet on nav push
+            // the other board should respond with PairingAck, then the game will commence.
+            if (navswitch_push_event_p(NAVSWITCH_PUSH))
+            {
+                packet_t pairing_packet = {
+                    .id = PAIRING_PACKET,
+                    .data = 0,
+                };
+                packet_send(pairing_packet);
+            }
             return;
         }
 
     case GAME_STATE_PLAYING:
         {
+            // Rotate piece
             if (button_push_event_p(BUTTON1))
                 piece_rotate(game_data->current_piece);
-
-            // TODO: Testing code, remove later
-            if (navswitch_push_event_p(NAVSWITCH_PUSH))
-            {
-                board_place_piece(game_data->board, game_data->current_piece);
-                piece_generate_next(&game_data->current_piece);
-            }
-
-            // TODO: Remove after testing
-            if (navswitch_push_event_p(NAVSWITCH_NORTH))
-                piece_move(game_data->current_piece, DIRECTION_UP);
 
             // Move current piece
             if (navswitch_push_event_p(NAVSWITCH_EAST))
@@ -98,6 +95,31 @@ static void display_task(__unused__ void* data)
                 tinygl_text(" Tetris");
                 init = true;
             }
+            break;
+        }
+
+    case GAME_STATE_STARTING:
+        {
+            // Display a 3 2 1 countdown before starting the game
+            // This task runs at a frequency of DISPLAY_TASK_FREQ. Once ticks == DISPLAY_TASK_FREQ, one second has elapsed.
+
+            static uint16_t ticks = 0;
+            if (ticks == 0)
+            {
+                tinygl_text_mode_set(TINYGL_TEXT_MODE_STEP);
+                tinygl_text("3");
+            }
+            else if (ticks == DISPLAY_TASK_FREQ)
+                tinygl_text("2");
+            else if (ticks == DISPLAY_TASK_FREQ * 2)
+                tinygl_text("1");
+            else if (ticks == DISPLAY_TASK_FREQ * 3)
+            {
+                game_data->game_state = GAME_STATE_PLAYING;
+                tinygl_text_mode_set(TINYGL_TEXT_MODE_SCROLL);
+            }
+
+            ticks++;
             break;
         }
 

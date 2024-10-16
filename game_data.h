@@ -13,6 +13,7 @@
 typedef enum {
     GAME_STATE_MAIN_MENU,
     GAME_STATE_PAUSED,
+    GAME_STATE_STARTING,
     GAME_STATE_PLAYING,
     GAME_STATE_DEAD,
 } game_state_t;
