@@ -49,7 +49,7 @@ static void button_task(__unused__ void* data)
             {
                 packet_t pairing_packet = {
                     .id = PAIRING_PACKET,
-                    .data = 0,
+                    .data = game_data->rng_seed,
                 };
                 packet_send(pairing_packet);
             }
@@ -239,6 +239,7 @@ static inline void environment_init(void)
     // misc api
     system_init();
     ir_uart_init();
+    timer_init();
     button_init();
 
     led_init();

@@ -192,6 +192,22 @@ bool piece_generate_next(piece_t** current_piece)
 {
     static uint8_t _nextPieceId = 0;
 
+    // On first call, randomise the indexes used for the `pieces` array. 
+    static bool init = false;
+    static uint8_t pieceIdx[PIECES_COUNT] = {0, 1, 2, 3, 4, 5, 6};
+    if (!init)
+    {
+        // iterate the pieceIdx array, swap each value with a random one.
+        for (uint8_t i = 0; i < ARRAY_SIZE(pieceIdx); i++)
+        {
+            uint8_t j = rand() % ARRAY_SIZE(pieceIdx);
+            uint8_t temp = pieceIdx[i];
+            pieceIdx[i] = pieceIdx[j];
+            pieceIdx[j] = temp;
+        }
+        init = true;
+    }
+
     if (*current_piece == NULL)
         *current_piece = malloc(sizeof(piece_t));
 
@@ -199,7 +215,7 @@ bool piece_generate_next(piece_t** current_piece)
     memset(piece, 0, sizeof(piece_t));
 
     // set values
-    piece->id = _nextPieceId;
+    piece->idx = pieceIdx[_nextPieceId];
     piece->orientation = ORIENTATION_NORTH;
     piece->pos = (tinygl_point_t){
         .x = 1,  // offset by 1 so pieces spawn centered
@@ -222,7 +238,7 @@ bool piece_generate_next(piece_t** current_piece)
 const tinygl_point_t* piece_get_points(piece_t* piece, uint8_t x, uint8_t y, orientation_t orientation)
 {
     static tinygl_point_t points[PIECE_NUM_POINTS];
-    uint16_t pattern = pieces[piece->id][orientation];
+    uint16_t pattern = pieces[piece->idx][orientation];
 
     // As stated above, each tetris piece is defined on a 4x4 grid.
     // We start with the left most bit, and continually shift it to the right, to test if the bit

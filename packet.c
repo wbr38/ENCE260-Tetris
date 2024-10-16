@@ -52,13 +52,12 @@ void handle_packet(packet_t packet)
     case PAIRING_PACKET:
         {
             // recvd pairing packet, set the rng_seed and respond
-            // uint8_t rng_seed = packet.data;
+            game_data->rng_seed = packet.data;
 
             packet_t ack = {
                 .id = PAIRING_ACK_PACKET,
                 .data = 0,
             };
-
             packet_send(ack);
             game_data->game_state = GAME_STATE_STARTING;
             break;

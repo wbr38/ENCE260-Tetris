@@ -32,7 +32,7 @@ typedef enum {
 /** Represents a tetris piece (tetromino) */
 typedef struct
 {
-    uint8_t id;
+    uint8_t idx;
     tinygl_point_t pos;
     orientation_t orientation;
 } piece_t;

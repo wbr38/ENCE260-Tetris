@@ -18,6 +18,9 @@
 #define PACKET_ID_LEN   3
 #define PACKET_DATA_LEN 5
 
+// equivalent to `2^(PACKET_DATA_LEN)`
+#define PACKET_DATA_MAX_VAL (1 << PACKET_DATA_LEN)
+
 typedef enum {
     /** Used to begin pairing. Contains the RNG seed for the order of spawning the pieces */
     PAIRING_PACKET,
