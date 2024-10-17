@@ -65,8 +65,9 @@ void handle_packet(packet_t packet)
 
     case PAIRING_ACK_PACKET:
         {
-            // recvd pairing ack. maybe have a check to confirm we actuall sent a pairing packet
-            // otherwise start 3 2 1 countdown
+            // TODO: Confirm we were the board sending Pairing packet
+            // recvd pairing ack, start the game
+            game_data->game_state = GAME_STATE_STARTING;
             break;
         }
 
