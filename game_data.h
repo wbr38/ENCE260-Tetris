@@ -16,6 +16,7 @@ typedef enum {
     GAME_STATE_STARTING,
     GAME_STATE_PLAYING,
     GAME_STATE_DEAD,
+    GAME_SATE_PAUSED,
 } game_state_t;
 
 typedef struct {
@@ -34,8 +35,7 @@ typedef struct {
 
     /** the total number of lines the other player has cleared */
     uint8_t their_lines_cleared;
-
-    bool game_paused;
+    
 } game_data_t;
 
 /**

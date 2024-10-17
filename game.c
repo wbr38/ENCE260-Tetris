@@ -53,6 +53,14 @@ static void button_task(__unused__ void* data)
                 };
                 packet_send(pairing_packet);
             }
+            if (button_push_event_p(BUTTON1)){
+                    if (game_data->game_state == GAME_STATE_PAUSED){
+                        game_data->game_state = GAME_STATE_PLAYING;
+                        
+                    } else {
+                    game_data->game_state = GAME_STATE_PAUSED;
+                    }
+                }
             return;
         }
 
@@ -72,6 +80,19 @@ static void button_task(__unused__ void* data)
             if (navswitch_push_event_p(NAVSWITCH_SOUTH))
                 piece_move(game_data->current_piece, DIRECTION_DOWN);
 
+            return;
+        }
+
+    case GAME_STATE_PAUSED:
+        {
+            if (button_push_event_p(BUTTON1)){
+                    if (game_data->game_state == GAME_STATE_PAUSED){
+                        game_data->game_state = GAME_STATE_PLAYING;
+                        
+                    } else {
+                    game_data->game_state = GAME_STATE_PAUSED;
+                    }
+                }
             return;
         }
 
@@ -151,6 +172,17 @@ static void display_task(__unused__ void* data)
             {
                 tinygl_clear();
                 tinygl_text(" Game Over");
+                game_over_init = true;
+            }
+            break;
+        }
+    
+    case GAME_STATE_PAUSED:
+        {
+            static bool game_over_init = false;
+            if (!game_over_init){
+                tinygl_clear();
+                tinygl_text("Paused");
                 game_over_init = true;
             }
             break;

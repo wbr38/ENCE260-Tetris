@@ -26,5 +26,4 @@ void game_data_init()
     piece_generate_next(&game_data->current_piece);
     game_data->our_lines_cleared = 0;
     game_data->their_lines_cleared = 0;
-    game_data->game_paused = false;
 }
