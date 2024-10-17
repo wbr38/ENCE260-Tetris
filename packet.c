@@ -51,7 +51,8 @@ void handle_packet(packet_t packet)
     {
     case PAIRING_PACKET:
         {
-            // TODO: Check we are not the one trying to send PairingPacket
+            // TODO: Does it really matter if both boards try to pair at the same time?
+            game_data->host = false;
 
             // recvd pairing packet, set the rng_seed and respond
             game_data->rng_seed = packet.data;
@@ -67,8 +68,12 @@ void handle_packet(packet_t packet)
 
     case PAIRING_ACK_PACKET:
         {
-            // TODO: Confirm we were the board sending Pairing packet
+            // We haven't sent a Pairing packet, but the other board for some reason is responding to one
+            if (!game_data->host)
+                return;
+
             // recvd pairing ack, start the game
+            game_data->host = true;
             game_data->game_state = GAME_STATE_STARTING;
             break;
         }

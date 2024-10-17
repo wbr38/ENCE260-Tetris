@@ -33,6 +33,13 @@ typedef enum {
 typedef struct {
     game_state_t game_state;
 
+    /**
+     * This is set to `true` if we are the board sending the Pairing packet.
+     * This is used to ensure the boards don't both try to pair at the same time.
+     * And to determine which board should send Ping packet, and which should respond with Pong.
+     */
+    bool host;
+
     /** seed used to randomise the order of tetris pieces spawning */
     uint8_t rng_seed;
 

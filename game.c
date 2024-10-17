@@ -52,6 +52,7 @@ static void button_task(__unused__ void* data)
                     .data = game_data->rng_seed,
                 };
                 packet_send(pairing_packet);
+                game_data->host = true;
             }
             return;
         }

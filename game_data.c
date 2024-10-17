@@ -21,6 +21,7 @@ void game_data_init()
     srand(timer_get());
 
     game_data->game_state = GAME_STATE_MAIN_MENU;
+    game_data->host = false;
     game_data->rng_seed = rand() % PACKET_DATA_MAX_VAL; // rng_seed needs to be networked (in PairingPacket), so can't be larger than packet data.
     game_data->board = board_init();
     piece_generate_next(&game_data->current_piece);
