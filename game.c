@@ -323,7 +323,7 @@ static void ping_pong_task(__unused__ void* data)
 
     // Pause the game if we are playing and didn't recv pingpong
     // Other game states will still send Ping, but not pause the game.
-    if (!game_data->recvd_pingpong && game_data->game_state == GAME_STATE_PLAYING)
+    if (!game_data->recvd_pingpong)
     {
         game_data->game_state = GAME_STATE_PAUSED;
         return;
