@@ -14,7 +14,9 @@ game_data_t* game_data;
 
 void game_data_init()
 {
-    game_data = malloc(sizeof(game_data_t));
+    if (game_data == NULL)
+        game_data = malloc(sizeof(game_data_t));
+
     memset(game_data, 0, sizeof(board_t));
 
     // randomise the prng seed

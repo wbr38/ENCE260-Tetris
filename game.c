@@ -104,6 +104,13 @@ static void button_task(__unused__ void* data)
             return;
         }
 
+    case GAME_STATE_GAME_OVER:
+        {
+            // Restart game, reinitialise data
+            if (navswitch_push_event_p(NAVSWITCH_PUSH))
+                game_data_init();
+        }
+
     default:
         break;
     }

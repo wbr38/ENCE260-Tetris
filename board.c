@@ -13,7 +13,10 @@
 
 board_t* board_init(void)
 {
-    board_t* board = malloc(sizeof(board_t));
+    static board_t* board = NULL;
+    if (board == NULL)
+        malloc(sizeof(board_t));
+
     memset(board, 0, sizeof(board_t));
     return board;
 }
