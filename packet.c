@@ -51,6 +51,10 @@ void handle_packet(packet_t packet)
     {
     case PAIRING_PACKET:
         {
+            // only pair on main menu screen
+            if (game_data->game_state != GAME_STATE_MAIN_MENU)
+                return;
+
             // TODO: Does it really matter if both boards try to pair at the same time?
             game_data->host = false;
 
