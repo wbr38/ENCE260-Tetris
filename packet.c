@@ -70,9 +70,6 @@ void handle_packet(packet_t packet)
             if (game_data->game_state != GAME_STATE_MAIN_MENU)
                 return;
 
-            // TODO: Does it really matter if both boards try to pair at the same time?
-            game_data->host = false;
-
             // recvd pairing packet, set the rng_seed and respond
             game_data->rng_seed = packet.data;
 
@@ -100,10 +97,6 @@ void handle_packet(packet_t packet)
 
     case PING_PACKET:
         {
-            // todo
-            // maybe we agree that whoever sent the Pairing packet should be the one sending the Ping packet
-            // the other board only sends pong
-            // that way each board knows which packet to expect and recv
             game_data->recvd_pingpong = true;
             packet_t pong = {
                 .id = PONG_PACKET,
@@ -115,7 +108,6 @@ void handle_packet(packet_t packet)
 
     case PONG_PACKET:
         {
-            // todo
             game_data->recvd_pingpong = true;
             break;
         }

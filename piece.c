@@ -311,7 +311,6 @@ bool piece_move(piece_t* piece, direction_t direction)
     }
 
     // Check this new position is valid
-    // TODO: Try to "kick" the piece into place
     bool is_valid = board_valid_position(game_data->board, piece, x, y, piece->orientation);
     if (!is_valid)
         return false;
