@@ -208,12 +208,9 @@ static void display_task(__unused__ void* data)
     
     case GAME_STATE_PAUSED:
         {
-            static bool game_over_init = false;
-            if (!game_over_init){
-                tinygl_clear();
+            if (state_changed)
                 tinygl_text("Paused");
-                game_over_init = true;
-            }
+
             break;
         }
 
@@ -310,14 +307,15 @@ static void ping_pong_task(__unused__ void* data) {
             packet_send(ping);
     }
     
-    if (game_data->recvd_pingpong == false){
-            game_data->game_state = GAME_STATE_PAUSED;
-            return;
-    } else {
-        game_data->game_state = GAME_STATE_PLAYING;
+    if (!game_data->recvd_pingpong)
+    {
+        game_data->game_state = GAME_STATE_PAUSED;
+        return;
     }
-
     
+    // Recvd pingpong and game was paused, set to playing
+    if (game_data->game_state == GAME_STATE_PAUSED)
+        game_data->game_state = GAME_STATE_PLAYING;
 
     game_data->recvd_pingpong = false;
 }
