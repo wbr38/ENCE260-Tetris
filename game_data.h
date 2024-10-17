@@ -59,6 +59,9 @@ typedef struct {
 
     /** Is the other player still alive/playing */
     bool other_player_dead;
+
+    /** whether the device has recieved a ping/pong packet from the other device */
+    bool recvd_pingpong;
 } game_data_t;
 
 /**

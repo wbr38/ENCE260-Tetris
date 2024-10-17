@@ -62,6 +62,7 @@ void handle_packet(packet_t packet)
                 .data = 0,
             };
             packet_send(ack);
+            game_data->host = false;
             game_data->game_state = GAME_STATE_STARTING;
             break;
         }
@@ -84,12 +85,19 @@ void handle_packet(packet_t packet)
             // maybe we agree that whoever sent the Pairing packet should be the one sending the Ping packet
             // the other board only sends pong
             // that way each board knows which packet to expect and recv
+            game_data->recvd_pingpong = true;
+            packet_t pong = {
+                .id = PONG_PACKET,
+                .data = 0,
+            };
+            packet_send(pong);
             break;
         }
 
     case PONG_PACKET:
         {
             // todo
+            game_data->recvd_pingpong = true;
             break;
         }
 

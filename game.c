@@ -25,8 +25,9 @@
 #define BUTTON_TASK_FREQ     100
 #define DISPLAY_TASK_FREQ    300
 #define IR_TASK_FREQ         100
-#define LED_FLASH_TASK_FREQ  8  // 1/8 -> 0.125ms
+#define LED_FLASH_TASK_FREQ  8  // 1/8 -> 125ms
 #define BOARD_MOVE_DOWN_FREQ 1  // 1s
+#define PING_PONG_TASK_FREQ  2 // 1/2 = 500ms
 
 // Constants
 #define TINYGL_SPEED 25
@@ -54,6 +55,14 @@ static void button_task(__unused__ void* data)
                 packet_send(pairing_packet);
                 game_data->host = true;
             }
+            if (button_push_event_p(BUTTON1)){
+                    if (game_data->game_state == GAME_STATE_PAUSED){
+                        game_data->game_state = GAME_STATE_PLAYING;
+                        
+                    } else {
+                    game_data->game_state = GAME_STATE_PAUSED;
+                    }
+                }
             return;
         }
 
@@ -73,6 +82,19 @@ static void button_task(__unused__ void* data)
             if (navswitch_push_event_p(NAVSWITCH_SOUTH))
                 piece_move(game_data->current_piece, DIRECTION_DOWN);
 
+            return;
+        }
+
+    case GAME_STATE_PAUSED:
+        {
+            if (button_push_event_p(BUTTON1)){
+                    if (game_data->game_state == GAME_STATE_PAUSED){
+                        game_data->game_state = GAME_STATE_PLAYING;
+                        
+                    } else {
+                    game_data->game_state = GAME_STATE_PAUSED;
+                    }
+                }
             return;
         }
 
@@ -183,6 +205,17 @@ static void display_task(__unused__ void* data)
             }
             break;
         }
+    
+    case GAME_STATE_PAUSED:
+        {
+            static bool game_over_init = false;
+            if (!game_over_init){
+                tinygl_clear();
+                tinygl_text("Paused");
+                game_over_init = true;
+            }
+            break;
+        }
 
     default:
         break;
@@ -260,6 +293,35 @@ static void led_flash_task(__unused__ void* data)
 }
 
 /**
+ * Task used to check that the two devices are sending and recieving packets
+ * pauses the game if not
+ */
+static void ping_pong_task(__unused__ void* data) {
+    if (game_data->game_state != GAME_STATE_PLAYING) { //if in main menu, ignore ping and pong
+        return;
+    }
+
+    if (game_data->host){
+            packet_t ping = {
+                .id = PING_PACKET,
+                .data = 0,
+            };
+            packet_send(ping);
+    }
+    
+    if (game_data->recvd_pingpong == false){
+            game_data->game_state = GAME_STATE_PAUSED;
+            return;
+    } else {
+        game_data->game_state = GAME_STATE_PLAYING;
+    }
+
+    
+
+    game_data->recvd_pingpong = false;
+}
+
+/**
  * Initialise the ucfk4 system and components
  */
 static inline void environment_init(void)
@@ -294,6 +356,7 @@ int main(void)
             {.func = board_move_down_task, .period = TASK_RATE / BOARD_MOVE_DOWN_FREQ},
             {.func = ir_update_task,       .period = TASK_RATE / IR_TASK_FREQ        },
             {.func = led_flash_task,       .period = TASK_RATE / LED_FLASH_TASK_FREQ },
+            {.func = ping_pong_task,       .period = TASK_RATE / PING_PONG_TASK_FREQ}
     };
 
     task_schedule(tasks, ARRAY_SIZE(tasks));
