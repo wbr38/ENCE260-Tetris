@@ -143,6 +143,7 @@ static void display_task(__unused__ void* data)
             else if (ticks == DISPLAY_TASK_FREQ * 3)
             {
                 game_data->game_state = GAME_STATE_PLAYING;
+                ticks = 0;
                 tinygl_text_mode_set(TINYGL_TEXT_MODE_SCROLL);
             }
 
