@@ -86,16 +86,18 @@ static void button_task(__unused__ void* data)
  */
 static void display_task(__unused__ void* data)
 {
+    // Detetct when game_state has been changed
+    static game_state_t old_state = 42;
+    bool state_changed = game_data->game_state != old_state;
+    old_state = game_data->game_state;
+
     switch (game_data->game_state)
     {
     case GAME_STATE_MAIN_MENU:
         {
-            static bool init = false;
-            if (!init)
-            {
+            if (state_changed)
                 tinygl_text(" Tetris");
-                init = true;
-            }
+
             break;
         }
 
@@ -147,12 +149,10 @@ static void display_task(__unused__ void* data)
 
     case GAME_STATE_DEAD:
         {
-            static bool init = false;
-            if (!init)
+            if (state_changed)
             {
                 tinygl_clear();
                 tinygl_text(" DEAD");
-                init = true;
             }
 
             // We are dead but board has not acknlowdged our die packet
@@ -170,8 +170,7 @@ static void display_task(__unused__ void* data)
 
     case GAME_STATE_GAME_OVER:
         {
-            static bool init = false;
-            if (!init)
+            if (state_changed)
             {
                 tinygl_clear();
 
@@ -181,7 +180,6 @@ static void display_task(__unused__ void* data)
                     tinygl_text(" LOSE");
                 else
                     tinygl_text(" DRAW");
-                init = true;
             }
             break;
         }
