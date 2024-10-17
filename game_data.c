@@ -10,8 +10,14 @@
 #include <string.h>
 #include <timer.h>
 
+/**
+ * Global variable of the game state.
+ */
 game_data_t* game_data = NULL;
 
+/**
+ * Initialise the global variable `game_data`.
+ */
 void game_data_init()
 {
     if (game_data == NULL)
