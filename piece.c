@@ -298,9 +298,8 @@ bool piece_move(piece_t* piece, direction_t direction)
         y++;
         break;
 
-    // TODO: Remove after testing
+    // tetris pieces are never moved upwards
     case DIRECTION_UP:
-        y--;
         break;
 
     default:
