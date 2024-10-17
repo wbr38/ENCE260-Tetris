@@ -145,6 +145,7 @@ static void display_task(__unused__ void* data)
                 game_data->game_state = GAME_STATE_PLAYING;
                 ticks = 0;
                 tinygl_text_mode_set(TINYGL_TEXT_MODE_SCROLL);
+                return; // don't increase ticks below, since we want to reset here
             }
 
             ticks++;
