@@ -11,16 +11,28 @@
 #include "game_data.h"
 #include "packet.h"
 
-board_t* board_init(void)
+/** Initialises the board data */
+void board_init(board_t** board)
 {
-    static board_t* board = NULL;
-    if (board == NULL)
-        board = malloc(sizeof(board_t));
+    if (*board == NULL)
+        *board = malloc(sizeof(board_t));
 
-    memset(board, 0, sizeof(board_t));
-    return board;
+    memset(*board, 0, sizeof(board_t));
+
+    // board->pieces are all set to 0 from above call
+    // nothing else to do here
 }
 
+/**
+ * @returns whether the given tetris piece, at the given coordinates and orientation, is at a valid position on the board.
+ *          i.e. it does not collide with any placed pieces or extend outside the bounds of the LED display.
+ *
+ * @param board The global `board` object
+ * @param piece The piece to check is valid
+ * @param x The x coordinate of the piece to test
+ * @param y The y coordinate of the piece to test
+ * @param orientation The orientation of the piece to test
+ */
 bool board_valid_position(board_t* board, piece_t* piece, uint8_t x, uint8_t y, orientation_t orientation)
 {
     const tinygl_point_t* points = piece_get_points(piece, x, y, orientation);
@@ -54,7 +66,6 @@ void board_shift_down(board_t* board, uint8_t row)
 
 /**
  * @brief Checks and clears any rows that are full. Shifts the board's points appropriately.
- * @param board
  * @return uint8_t The number of lines cleared
  */
 uint8_t board_clear_lines(board_t* board)
@@ -82,6 +93,7 @@ uint8_t board_clear_lines(board_t* board)
     return num_clears;
 }
 
+/** Place this tetris piece at its current position on the board. */
 void board_place_piece(board_t* board, piece_t* piece)
 {
     const tinygl_point_t* points = piece_get_points(piece, piece->pos.x, piece->pos.y, piece->orientation);

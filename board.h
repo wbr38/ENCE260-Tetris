@@ -17,8 +17,8 @@ typedef struct {
     bool tiles[TINYGL_WIDTH][TINYGL_HEIGHT];
 } board_t;
 
-/** Returns a new board object */
-board_t* board_init(void);
+/** Initialises the board data */
+void board_init(board_t** board);
 
 /** Place this tetris piece at its current position on the board. */
 void board_place_piece(board_t* board, piece_t* piece);
