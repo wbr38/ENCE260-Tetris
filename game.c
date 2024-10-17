@@ -304,6 +304,9 @@ static void ping_pong_task(__unused__ void* data)
         }
     }
 
+    if (game_data->other_player_dead)
+        return;
+
     if (game_data->game_state != GAME_STATE_PAUSED && game_data->game_state != GAME_STATE_PLAYING)
         return;
 
