@@ -188,6 +188,17 @@ const uint16_t pieces[PIECES_COUNT][PIECE_NUM_ROTATIONS] = {
     // clang-format on
 };
 
+static void shuffle_array(uint8_t* arr, size_t size)
+{
+    for (uint8_t i = 0; i < size; i++)
+    {
+        uint8_t j = rand() % size;
+        uint8_t temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+}
+
 bool piece_generate_next(piece_t** current_piece)
 {
     static uint8_t _nextPieceId = 0;
@@ -197,14 +208,7 @@ bool piece_generate_next(piece_t** current_piece)
     static uint8_t pieceIdx[PIECES_COUNT] = {0, 1, 2, 3, 4, 5, 6};
     if (!init)
     {
-        // iterate the pieceIdx array, swap each value with a random one.
-        for (uint8_t i = 0; i < ARRAY_SIZE(pieceIdx); i++)
-        {
-            uint8_t j = rand() % ARRAY_SIZE(pieceIdx);
-            uint8_t temp = pieceIdx[i];
-            pieceIdx[i] = pieceIdx[j];
-            pieceIdx[j] = temp;
-        }
+        shuffle_array(pieceIdx, ARRAY_SIZE(pieceIdx));
         init = true;
     }
 
