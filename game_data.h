@@ -35,7 +35,13 @@ typedef struct {
 
     /** the total number of lines the other player has cleared */
     uint8_t their_lines_cleared;
-    
+
+    /** true if player sent the pairing request packet, otherwise false */
+    bool host;
+
+    /** whether the device has recieved a ping/pong packet from the other device */
+    bool recvd_pingpong;
+
 } game_data_t;
 
 /**
