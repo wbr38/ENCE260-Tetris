@@ -308,7 +308,7 @@ static void ping_pong_task(__unused__ void* data)
         }
 
         // both players dead, game is over
-        if (game_data->die_packet_acknowledged && game_data->other_player_dead)
+        if (game_data->game_state == GAME_STATE_DEAD && game_data->other_player_dead)
             game_data->game_state = GAME_STATE_GAME_OVER;
     }
 
