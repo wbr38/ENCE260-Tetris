@@ -311,12 +311,7 @@ static void ping_pong_task(__unused__ void* data)
             game_data->game_state = GAME_STATE_GAME_OVER;
     }
 
-    if (game_data->other_player_dead)
-        return;
-
-    if (game_data->game_state != GAME_STATE_PAUSED && game_data->game_state != GAME_STATE_PLAYING)
-        return;
-
+    // Always send Ping
     if (game_data->host)
     {
         packet_t ping = {
@@ -326,7 +321,9 @@ static void ping_pong_task(__unused__ void* data)
         packet_send(ping);
     }
 
-    if (!game_data->recvd_pingpong)
+    // Pause the game if we are playing and didn't recv pingpong
+    // Other game states will still send Ping, but not pause the game.
+    if (!game_data->recvd_pingpong && game_data->game_state == GAME_STATE_PLAYING)
     {
         game_data->game_state = GAME_STATE_PAUSED;
         return;
