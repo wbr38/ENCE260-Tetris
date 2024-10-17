@@ -32,5 +32,5 @@ void game_data_init()
     game_data->their_lines_cleared = 0;
     game_data->die_packet_acknowledged = false;
     game_data->other_player_dead = false;
-    game_data->recvd_pingpong = false;
+    game_data->recvd_pingpong = true; // initialise with true so game doesn't immediately pause
 }
