@@ -10,7 +10,7 @@
 #include <string.h>
 #include <timer.h>
 
-game_data_t* game_data;
+game_data_t* game_data = NULL;
 
 void game_data_init()
 {
@@ -26,6 +26,7 @@ void game_data_init()
     game_data->host = false;
     game_data->rng_seed = rand() % PACKET_DATA_MAX_VAL; // rng_seed needs to be networked (in PairingPacket), so can't be larger than packet data.
     game_data->board = board_init();
+    game_data->current_piece = NULL;
     piece_generate_next(&game_data->current_piece);
     game_data->our_lines_cleared = 0;
     game_data->their_lines_cleared = 0;
