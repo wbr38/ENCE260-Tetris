@@ -155,3 +155,35 @@ void handle_packet(packet_t packet)
         break;
     }
 }
+
+/**
+ * Checks to see if we should send the die packet.
+ * This function checks if both players are dead, then the game is over.
+ */
+void check_die_packet(void)
+{
+    // We are dead but board has not acknlowdged our die packet
+    if (game_data->game_state == GAME_STATE_DEAD && !game_data->die_packet_acknowledged)
+    {
+        packet_t die = {
+            .id = DIE_PACKET,
+            .data = 0,
+        };
+        packet_send(die);
+    }
+}
+
+/**
+ * If game_data->host is true, the
+ */
+void check_ping_pong_packet(void)
+{
+    if (game_data->host)
+    {
+        packet_t ping = {
+            .id = PING_PACKET,
+            .data = 0,
+        };
+        packet_send(ping);
+    }
+}

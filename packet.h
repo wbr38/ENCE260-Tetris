@@ -18,6 +18,9 @@
 #define PACKET_ID_LEN   3
 #define PACKET_DATA_LEN 5
 
+// equivalent to `2^(PACKET_ID_LEN)`
+#define PACKET_ID_MAX_VAL (1 << PACKET_ID_LEN)
+
 // equivalent to `2^(PACKET_DATA_LEN)`
 #define PACKET_DATA_MAX_VAL (1 << PACKET_DATA_LEN)
 
@@ -46,7 +49,11 @@ typedef enum {
     /** Acknowledgement of DIE_PACKET */
     DIE_ACK_PACKET,
 
-    /** Placeholder to determine max value of this enum. Not an actual packet! */
+    /**
+     * Placeholder to determine max value of this enum. Not an actual packet!
+     * There should not be more than PACKET_ID_MAX_VAL packet ids.
+     * If there are, more bits should be assigned for the ID.
+     */
     _PACKET_COUNT,
 } PacketID;
 
@@ -71,4 +78,15 @@ bool packet_decode(uint8_t byte, packet_t* packet);
 uint8_t packet_encode(packet_t packet);
 /** Handles what steps to take depending on the type of packet recieved.*/
 void handle_packet(packet_t packet);
+
+/**
+ * Checks to see if we should send the die packet.
+ * This function checks if both players are dead, then the game is over.
+ */
+void check_die_packet(void);
+
+/**
+ * If game_data->host is true, the 
+ */
+void check_ping_pong_packet(void);
 #endif  // PACKET_H

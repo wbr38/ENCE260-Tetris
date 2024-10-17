@@ -22,12 +22,12 @@
 #include <tinygl.h>
 
 // Task frequency (in Hz)
-#define BUTTON_TASK_FREQ     100
-#define DISPLAY_TASK_FREQ    300
-#define IR_TASK_FREQ         100
-#define LED_FLASH_TASK_FREQ  8  // 1/8 -> 125ms
-#define BOARD_MOVE_DOWN_FREQ 1  // 1s
-#define PING_PONG_TASK_FREQ  2  // 1/2 = 500ms
+#define BUTTON_TASK_FREQ      100
+#define DISPLAY_TASK_FREQ     300
+#define IR_TASK_FREQ          100
+#define LED_FLASH_TASK_FREQ   8  // 1/8 -> 125ms
+#define BOARD_MOVE_DOWN_FREQ  1  // 1s
+#define SEND_PACKET_TASK_FREQ 2  // 1/2 = 500ms
 
 // Constants
 #define TINYGL_SPEED 25
@@ -290,49 +290,15 @@ static void led_flash_task(__unused__ void* data)
 }
 
 /**
- * Task used to check that the two devices are sending and recieving packets
- * pauses the game if not
+ * Task used to periodically send packets to the other board.
  */
-static void ping_pong_task(__unused__ void* data)
+static void send_packet_task(__unused__ void* data)
 {
-    // die packet
-    {
-        // We are dead but board has not acknlowdged our die packet
-        if (game_data->game_state == GAME_STATE_DEAD && !game_data->die_packet_acknowledged)
-        {
-            packet_t die = {
-                .id = DIE_PACKET,
-                .data = 0,
-            };
-            packet_send(die);
-        }
+    check_die_packet();
+    game_data_check_game_over();
 
-        // both players dead, game is over
-        if (game_data->game_state == GAME_STATE_DEAD && game_data->other_player_dead)
-            game_data->game_state = GAME_STATE_GAME_OVER;
-    }
-
-    // Host will always send Ping packet
-    // In handle_packet, we set recvd_pignpong to true
-    if (game_data->host)
-    {
-        packet_t ping = {
-            .id = PING_PACKET,
-            .data = 0,
-        };
-        packet_send(ping);
-    }
-
-    // Didn't recv a pingpong. Only if we are playing, pause the game.
-    if (!game_data->recvd_pingpong && game_data->game_state == GAME_STATE_PLAYING)
-        game_data->game_state = GAME_STATE_PAUSED;
-
-    // We did recv a pingpong. Unpause the game if we are currently paused
-    // We only ever pause when we are playing, so unpause by setting state back to playing.
-    if (game_data->recvd_pingpong && game_data->game_state == GAME_STATE_PAUSED)
-        game_data->game_state = GAME_STATE_PLAYING;
-
-    game_data->recvd_pingpong = false;
+    check_ping_pong_packet();
+    game_data_check_pause();
 }
 
 /**
@@ -365,12 +331,12 @@ int main(void)
     // Run tasks
     task_t tasks[] =
         {
-            {.func = display_task,         .period = TASK_RATE / DISPLAY_TASK_FREQ   },
-            {.func = button_task,          .period = TASK_RATE / BUTTON_TASK_FREQ    },
-            {.func = board_move_down_task, .period = TASK_RATE / BOARD_MOVE_DOWN_FREQ},
-            {.func = ir_update_task,       .period = TASK_RATE / IR_TASK_FREQ        },
-            {.func = led_flash_task,       .period = TASK_RATE / LED_FLASH_TASK_FREQ },
-            {.func = ping_pong_task,       .period = TASK_RATE / PING_PONG_TASK_FREQ }
+            {.func = display_task,         .period = TASK_RATE / DISPLAY_TASK_FREQ    },
+            {.func = button_task,          .period = TASK_RATE / BUTTON_TASK_FREQ     },
+            {.func = board_move_down_task, .period = TASK_RATE / BOARD_MOVE_DOWN_FREQ },
+            {.func = ir_update_task,       .period = TASK_RATE / IR_TASK_FREQ         },
+            {.func = led_flash_task,       .period = TASK_RATE / LED_FLASH_TASK_FREQ  },
+            {.func = send_packet_task,     .period = TASK_RATE / SEND_PACKET_TASK_FREQ}
     };
 
     task_schedule(tasks, ARRAY_SIZE(tasks));

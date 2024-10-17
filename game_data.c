@@ -41,3 +41,35 @@ void game_data_init()
     game_data->other_player_dead = false;
     game_data->recvd_pingpong = true; // initialise with true so game doesn't immediately pause
 }
+
+/**
+ * This function checks if both players have died, then sets the game state to GAME_OVER.
+ */
+void game_data_check_game_over(void)
+{
+    // both players dead, game is over
+    if (game_data->game_state == GAME_STATE_DEAD && game_data->other_player_dead)
+        game_data->game_state = GAME_STATE_GAME_OVER;
+}
+
+/**
+ * This function checks if the game should be paused, if this board has not received the
+ * required ping or pong packet.
+ */
+void game_data_check_pause(void)
+{
+    // The host will always send a Ping packet
+    // In handle_packet, we set `game_data->recv_pingpong` to true when a Ping/Pong packet has been received
+
+    // Didn't recv a pingpong. Only if we are playing, pause the game.
+    if (!game_data->recvd_pingpong && game_data->game_state == GAME_STATE_PLAYING)
+        game_data->game_state = GAME_STATE_PAUSED;
+
+    // We did recv a pingpong. Unpause the game if we are currently paused
+    // We only ever pause when we are playing, so unpause by setting state back to playing.
+    if (game_data->recvd_pingpong && game_data->game_state == GAME_STATE_PAUSED)
+        game_data->game_state = GAME_STATE_PLAYING;
+
+    game_data->recvd_pingpong = false;
+
+}

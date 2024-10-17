@@ -74,4 +74,15 @@ extern game_data_t* game_data;
  */
 void game_data_init(void);
 
+/**
+ * This function checks if both players have died, and sets the game state to GAME_OVER.
+ */
+void game_data_check_game_over(void);
+
+/**
+ * This function checks if the game should be paused, if this board has not received the
+ * required ping or pong packet.
+ */
+void game_data_check_pause(void);
+
 #endif  // GAME_DATA_H
