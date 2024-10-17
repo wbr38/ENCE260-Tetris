@@ -145,7 +145,7 @@ static void display_task(__unused__ void* data)
                 game_data->game_state = GAME_STATE_PLAYING;
                 ticks = 0;
                 tinygl_text_mode_set(TINYGL_TEXT_MODE_SCROLL);
-                return; // don't increase ticks below, since we want to reset here
+                return;  // don't increase ticks below, since we want to reset here
             }
 
             ticks++;
@@ -203,7 +203,8 @@ static void display_task(__unused__ void* data)
     case GAME_STATE_PAUSED:
         {
             tinygl_clear();
-            for (uint8_t y = 1; y < TINYGL_HEIGHT - 1; y++) {
+            for (uint8_t y = 1; y < TINYGL_HEIGHT - 1; y++)
+            {
                 tinygl_point_t col2 = {1, y};
                 tinygl_point_t col4 = {3, y};
                 tinygl_pixel_set(col2, 1);
@@ -311,7 +312,8 @@ static void ping_pong_task(__unused__ void* data)
             game_data->game_state = GAME_STATE_GAME_OVER;
     }
 
-    // Always send Ping
+    // Host will always send Ping packet
+    // In handle_packet, we set recvd_pignpong to true
     if (game_data->host)
     {
         packet_t ping = {
@@ -321,16 +323,13 @@ static void ping_pong_task(__unused__ void* data)
         packet_send(ping);
     }
 
-    // Pause the game if we are playing and didn't recv pingpong
-    // Other game states will still send Ping, but not pause the game.
-    if (!game_data->recvd_pingpong)
-    {
+    // Didn't recv a pingpong. Only if we are playing, pause the game.
+    if (!game_data->recvd_pingpong && game_data->game_state == GAME_STATE_PLAYING)
         game_data->game_state = GAME_STATE_PAUSED;
-        return;
-    }
 
-    // Recvd pingpong and game was paused, set to playing
-    if (game_data->game_state == GAME_STATE_PAUSED)
+    // We did recv a pingpong. Unpause the game if we are currently paused
+    // We only ever pause when we are playing, so unpause by setting state back to playing.
+    if (game_data->recvd_pingpong && game_data->game_state == GAME_STATE_PAUSED)
         game_data->game_state = GAME_STATE_PLAYING;
 
     game_data->recvd_pingpong = false;
