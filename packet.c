@@ -13,6 +13,9 @@
 // Generate a binary number of n 1s. E.g.: ONES(3) -> 0b111
 #define ONES(n) ((1 << (n)) - 1)
 
+/**
+ * Decode the given byte into the packet structure.
+ */
 bool packet_decode(uint8_t byte, packet_t* packet)
 {
     packet->raw = byte;
@@ -24,11 +27,17 @@ bool packet_decode(uint8_t byte, packet_t* packet)
     return true;
 }
 
+/**
+ * Encodes the packet id and data into a byte to be sent by the IR.
+ */
 uint8_t packet_encode(packet_t packet)
 {
     return packet.raw;
 }
 
+/**
+ * Gets the byte and packet from a given packet.
+ */
 bool packet_get(packet_t* packet)
 {
     // wait until a byte is ready to be read
@@ -39,12 +48,18 @@ bool packet_get(packet_t* packet)
     return packet_decode(byte, packet);
 }
 
+/**
+ * Send the given packet through IR to the other device.
+ */
 void packet_send(packet_t packet)
 {
     uint8_t byte = packet_encode(packet);
     ir_uart_putc(byte);
 }
 
+/**
+ * Handles what steps to take depending on the type of packet recieved.
+ */
 void handle_packet(packet_t packet)
 {
     switch (packet.id)

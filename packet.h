@@ -21,6 +21,9 @@
 // equivalent to `2^(PACKET_DATA_LEN)`
 #define PACKET_DATA_MAX_VAL (1 << PACKET_DATA_LEN)
 
+/**
+ * Different types of packets that can be recieved.
+ */
 typedef enum {
     /** Used to begin pairing. Contains the RNG seed for the order of spawning the pieces */
     PAIRING_PACKET,
@@ -47,6 +50,9 @@ typedef enum {
     _PACKET_COUNT,
 } PacketID;
 
+/**
+ * Defines the type packet_t which will be sent between devices
+ */
 typedef union {
     struct {
         uint8_t id : PACKET_ID_LEN;
@@ -55,11 +61,14 @@ typedef union {
     uint8_t raw;
 } packet_t;
 
+/** Gets the byte and packet from a given packet. */
 bool packet_get(packet_t* packet);
+/** Send the given packet through IR to the other device.*/
 void packet_send(packet_t packet);
-
+/** Decode the given byte into the packet structure. */
 bool packet_decode(uint8_t byte, packet_t* packet);
+/** Encodes the packet id and data into a byte to be sent by the IR. */
 uint8_t packet_encode(packet_t packet);
-
+/** Handles what steps to take depending on the type of packet recieved.*/
 void handle_packet(packet_t packet);
 #endif  // PACKET_H
