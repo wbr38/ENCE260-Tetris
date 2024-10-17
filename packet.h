@@ -43,9 +43,6 @@ typedef enum {
     /** Acknowledgement of DIE_PACKET */
     DIE_ACK_PACKET,
 
-    // TODO: Remove after testing
-    TEST_PACKET,
-
     /** Placeholder to determine max value of this enum. Not an actual packet! */
     _PACKET_COUNT,
 } PacketID;
