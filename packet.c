@@ -119,10 +119,6 @@ void handle_packet(packet_t packet)
                 .data = 0,
             };
             packet_send(ack);
-
-            // both players dead, game is over
-            if (game_data->game_state == GAME_STATE_DEAD && game_data->other_player_dead)
-                game_data->game_state = GAME_STATE_GAME_OVER;
             break;
         }
 

@@ -294,7 +294,7 @@ static void ping_pong_task(__unused__ void* data)
     // die packet
     {
         // We are dead but board has not acknlowdged our die packet
-        if (!game_data->die_packet_acknowledged)
+        if (game_data->game_state == GAME_STATE_DEAD && !game_data->die_packet_acknowledged)
         {
             packet_t die = {
                 .id = DIE_PACKET,
@@ -302,6 +302,10 @@ static void ping_pong_task(__unused__ void* data)
             };
             packet_send(die);
         }
+
+        // both players dead, game is over
+        if (game_data->game_state == GAME_STATE_DEAD && game_data->other_player_dead)
+            game_data->game_state = GAME_STATE_GAME_OVER;
     }
 
     if (game_data->other_player_dead)
