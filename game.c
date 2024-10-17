@@ -55,17 +55,6 @@ static void button_task(__unused__ void* data)
                 packet_send(pairing_packet);
                 game_data->host = true;
             }
-            if (button_push_event_p(BUTTON1))
-            {
-                if (game_data->game_state == GAME_STATE_PAUSED)
-                {
-                    game_data->game_state = GAME_STATE_PLAYING;
-                }
-                else
-                {
-                    game_data->game_state = GAME_STATE_PAUSED;
-                }
-            }
             return;
         }
 
