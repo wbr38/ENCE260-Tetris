@@ -201,7 +201,10 @@ static void display_task(__unused__ void* data)
     case GAME_STATE_PAUSED:
         {
             if (state_changed)
-                tinygl_text("Paused");
+                for (uint8_t y = 0; y < TINYGL_HEIGHT; y++) {
+                    tinygl_point(2, y);
+                    tinygl_point(4, y);
+                }
 
             break;
         }
