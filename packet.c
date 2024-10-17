@@ -97,13 +97,29 @@ void handle_packet(packet_t packet)
 
     case DIE_PACKET:
         {
-            // TODO
+            // Other player has died
+            game_data->other_player_dead = true;
+
+            // Acknowledge the packet
+            packet_t ack = {
+                .id = DIE_ACK_PACKET,
+                .data = 0,
+            };
+            packet_send(ack);
+
+            // both players dead, game is over
+            if (game_data->game_state == GAME_STATE_DEAD && game_data->other_player_dead)
+                game_data->game_state = GAME_STATE_GAME_OVER;
             break;
         }
 
     case DIE_ACK_PACKET:
         {
-            // TODO
+            // For some reason the board thought we sent a die packet, when we aren't dead
+            if (game_data->game_state != GAME_STATE_DEAD)
+                return;
+
+            game_data->die_packet_acknowledged = true;
             break;
         }
 

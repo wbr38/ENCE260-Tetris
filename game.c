@@ -146,12 +146,41 @@ static void display_task(__unused__ void* data)
 
     case GAME_STATE_DEAD:
         {
-            static bool game_over_init = false;
-            if (!game_over_init)
+            static bool init = false;
+            if (!init)
             {
                 tinygl_clear();
-                tinygl_text(" Game Over");
-                game_over_init = true;
+                tinygl_text(" DEAD");
+                init = true;
+            }
+
+            // We are dead but board has not acknlowdged our die packet
+            if (!game_data->die_packet_acknowledged)
+            {
+                packet_t die = {
+                    .id = DIE_PACKET,
+                    .data = 0,
+                };
+                packet_send(die);
+            }
+
+            break;
+        }
+
+    case GAME_STATE_GAME_OVER:
+        {
+            static bool init = false;
+            if (!init)
+            {
+                tinygl_clear();
+
+                if (game_data->our_lines_cleared > game_data->their_lines_cleared)
+                    tinygl_text(" WIN");
+                else if (game_data->our_lines_cleared < game_data->their_lines_cleared)
+                    tinygl_text(" LOSE");
+                else
+                    tinygl_text(" DRAW");
+                init = true;
             }
             break;
         }

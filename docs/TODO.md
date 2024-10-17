@@ -37,11 +37,6 @@
 
         set game_data->recvd_pingpong to false
 
-- Add Die/DieAck packet
-    probably need another game state
-    DEAD - we are dead, other player still alive so game is ongoing
-    GAME_OVER - both players are dead
-
 - Add more func docs, at least to all functions in header files
 
 - Add README (check marking guide for what this needs to contain)
