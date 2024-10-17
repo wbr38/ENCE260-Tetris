@@ -183,16 +183,6 @@ static void display_task(__unused__ void* data)
                 tinygl_text(" DEAD");
             }
 
-            // We are dead but board has not acknlowdged our die packet
-            if (!game_data->die_packet_acknowledged)
-            {
-                packet_t die = {
-                    .id = DIE_PACKET,
-                    .data = 0,
-                };
-                packet_send(die);
-            }
-
             break;
         }
 
@@ -301,6 +291,19 @@ static void led_flash_task(__unused__ void* data)
  */
 static void ping_pong_task(__unused__ void* data)
 {
+    // die packet
+    {
+        // We are dead but board has not acknlowdged our die packet
+        if (!game_data->die_packet_acknowledged)
+        {
+            packet_t die = {
+                .id = DIE_PACKET,
+                .data = 0,
+            };
+            packet_send(die);
+        }
+    }
+
     if (game_data->game_state != GAME_STATE_PAUSED && game_data->game_state != GAME_STATE_PLAYING)
         return;
 

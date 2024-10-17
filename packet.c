@@ -128,9 +128,9 @@ void handle_packet(packet_t packet)
 
     case DIE_ACK_PACKET:
         {
-            // For some reason the board thought we sent a die packet, when we aren't dead
-            if (game_data->game_state != GAME_STATE_DEAD)
-                return;
+            // // For some reason the board thought we sent a die packet, when we aren't dead
+            // if (game_data->game_state != GAME_STATE_DEAD)
+            //     return;
 
             game_data->die_packet_acknowledged = true;
             break;
