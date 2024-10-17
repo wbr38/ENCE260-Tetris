@@ -297,9 +297,10 @@ static void led_flash_task(__unused__ void* data)
  * pauses the game if not
  */
 static void ping_pong_task(__unused__ void* data) {
-    if (game_data->game_state != GAME_STATE_PLAYING) { //if in main menu, ignore ping and pong
+    if (game_data->game_state != GAME_STATE_PAUSED
+        && game_data->game_state != GAME_STATE_PLAYING
+    )
         return;
-    }
 
     if (game_data->host){
             packet_t ping = {
