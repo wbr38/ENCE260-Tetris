@@ -59,7 +59,7 @@ static void button_task(__unused__ void* data)
     case GAME_STATE_PLAYING:
         {
             // Rotate piece
-            if (button_push_event_p(BUTTON1))
+            if (navswitch_push_event_p(NAVSWITCH_PUSH))
                 piece_rotate(game_data->current_piece);
 
             // Move current piece

@@ -51,6 +51,8 @@ void handle_packet(packet_t packet)
     {
     case PAIRING_PACKET:
         {
+            // TODO: Check we are not the one trying to send PairingPacket
+
             // recvd pairing packet, set the rng_seed and respond
             game_data->rng_seed = packet.data;
 

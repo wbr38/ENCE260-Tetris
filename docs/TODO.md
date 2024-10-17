@@ -1,8 +1,5 @@
 # TODO
 
-- Make nav push rotate instead of button1
-    use button1 for dev testing, otherwise we end up blocking the IR receiver
-
 - Add Ping Pong (pause)
 
     Pausing functionality:
