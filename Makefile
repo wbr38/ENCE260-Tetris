@@ -34,7 +34,21 @@ CFLAGS += \
 OBJS=game.o piece.o board.o packet.o game_data.o
 
 # from API
-OBJS+=system.o button.o led.o timer.o pacer.o tinygl.o display.o ledmat.o font.o task.o navswitch.o ir_uart.o timer0.o usart1.o prescale.o
+OBJS+=system.o \
+	button.o \
+	led.o \
+	timer.o \
+	pacer.o \
+	tinygl.o \
+	display.o \
+	ledmat.o \
+	font.o \
+	task.o \
+	navswitch.o \
+	ir_uart.o \
+	timer0.o \
+	usart1.o \
+	prescale.o
 
 # Include automatically generated dependency files, if they exist
 -include $(OBJS:.o=.d)
