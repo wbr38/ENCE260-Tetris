@@ -17,6 +17,7 @@
  */
 void board_init(board_t** board)
 {
+    // On first run we malloc the board pointer, and continue to reuse it for the rest of the program
     static bool init = false;
     if (!init)
     {

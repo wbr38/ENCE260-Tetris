@@ -20,6 +20,7 @@ game_data_t* game_data = NULL;
  */
 void game_data_init()
 {
+    // On first run we malloc the game_data pointer, and continue to reuse it for the rest of the program
     static bool init = false;
     if (!init)
     {

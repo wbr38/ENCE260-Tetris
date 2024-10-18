@@ -218,6 +218,8 @@ bool piece_generate_next(piece_t** current_piece)
     if (!init)
     {
         shuffle_array(pieceIdx, ARRAY_SIZE(pieceIdx));
+
+        // On first run we malloc the current_piece pointer, and continue to reuse it for the rest of the program
         *current_piece = malloc(sizeof(piece_t));
         init = true;
     }
