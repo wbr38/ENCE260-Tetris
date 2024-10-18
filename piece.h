@@ -1,5 +1,5 @@
 /** @file piece.h
- *  @authors William Brown, Matthew Wills
+ *  @authors William Brown (wbr38), Matthew Wills (mwi158)
  *  @date 12 October 2024
  *  @brief Represents a tetris piece/block/tetromino.
  */

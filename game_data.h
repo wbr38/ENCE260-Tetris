@@ -1,5 +1,5 @@
 /** @file game_data.h
- *  @authors William Brown, Matthew Wills
+ *  @authors William Brown (wbr38), Matthew Wills (mwi158)
  *  @date 15 October 2024
  *  @brief A structure to contain the current state of the game
  */

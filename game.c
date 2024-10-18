@@ -1,5 +1,5 @@
 /** @file game.c
- *  @authors William Brown, Matthew Wills
+ *  @authors William Brown (wbr38), Matthew Wills (mwi158)
  *  @date 12 October 2024
  *  @brief A multiplayer 1v1 tetris game
  */

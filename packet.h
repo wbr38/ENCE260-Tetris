@@ -1,5 +1,5 @@
 /** @file packet.h
- *  @authors William Brown, Matthew Wills
+ *  @authors William Brown (wbr38), Matthew Wills (mwi158)
  *  @date 12 October 2024
  *  @brief Functionality for sending, recieving, and handling packets via IR.
  */

@@ -1,8 +1,8 @@
 # Tetris
 
 ## Authors
-- William Brown
-- Matthew Wills
+- William Brown (wbr38)
+- Matthew Wills (mwi158)
 
 ## Description
 This is a 2 player game, opponents play simultaneously on their own device. Blocks spawn at the top of the screen and fall down, place the blocks in full rows to clear the row and earn points. Stacking blocks too high will end your round. Whoever has the most points at the end of their round wins. The blue led will flash when the opponent clears a row. After both opponents have completed a round, results are displayed and they can reset and play another round.
