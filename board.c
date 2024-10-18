@@ -17,12 +17,16 @@
  */
 void board_init(board_t** board)
 {
-    if (*board == NULL)
+    static bool init = false;
+    if (!init)
+    {
         *board = malloc(sizeof(board_t));
+        init = true;
+    }
 
     memset(*board, 0, sizeof(board_t));
 
-    // board->pieces are all set to 0 from above call
+    // board->pieces are all set to 0 from above call to memset
     // nothing else to do here
 }
 
