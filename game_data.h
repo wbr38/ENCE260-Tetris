@@ -31,6 +31,8 @@ typedef enum {
 } game_state_t;
 
 typedef struct {
+    
+    /** the current state of the game */
     game_state_t game_state;
 
     /**
@@ -43,6 +45,7 @@ typedef struct {
     /** seed used to randomise the order of tetris pieces spawning */
     uint8_t rng_seed;
 
+    /** the tetris board/grid */
     board_t* board;
 
     /** the current tetris piece being placed/controlled */

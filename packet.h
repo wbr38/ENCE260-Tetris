@@ -25,7 +25,7 @@
 #define PACKET_DATA_MAX_VAL (1 << PACKET_DATA_LEN)
 
 /**
- * Different types of packets that can be recieved.
+ * Enum of ids of packets that can be sent or received.
  */
 typedef enum {
     /** Used to begin pairing. Contains the RNG seed for the order of spawning the pieces */
@@ -37,7 +37,7 @@ typedef enum {
     /** Empty packet sent periodically to confirm both boards are still in communication. Expect a PONG_PACKET in response */
     PING_PACKET,
 
-    /** Acknowledgment for PING_PACKET */
+    /** Sent in acknowledgment for PING_PACKET */
     PONG_PACKET,
 
     /** Used to indicate that X amount of lines have been cleared */
@@ -51,14 +51,19 @@ typedef enum {
 
     /**
      * Placeholder to determine max value of this enum. Not an actual packet!
-     * There should not be more than PACKET_ID_MAX_VAL packet ids.
+     * There should not be more than `PACKET_ID_MAX_VAL` packet ids.
      * If there are, more bits should be assigned for the ID.
      */
     _PACKET_COUNT,
 } PacketID;
 
 /**
- * Defines the type packet_t which will be sent between devices
+ * Defined structure for a packet sent/received by IR.
+ * The size of this structure is equal to one byte: `sizeof(uint8_t)`.
+ *
+ * This is a union providing two ways to access the data:
+ * - `id` and `data` are defined as bitfields, to access these parts of the byte.
+ * - `raw` is used to access the raw uint8_t byte.
  */
 typedef union {
     struct {
@@ -68,25 +73,50 @@ typedef union {
     uint8_t raw;
 } packet_t;
 
-/** Gets the byte and packet from a given packet. */
+// /**
+//  * @brief Decode the given `byte` into the `packet`.
+//  * @param byte The unmodified uint8_t received from the IR sensor.
+//  * @param packet Pass by reference `packet` object.
+//  * @return Whether the byte that was decoded is valid.
+//  *         i.e. the packet ID received is valid.
+//  */
+// bool packet_decode(uint8_t byte, packet_t* packet);
+
+// /**
+//  * @brief Encode the given packet into a uint8_t byte to be sent by IR.
+//  * @param packet The packet to be sent
+//  * @return The byte to be sent by the IR transmitter.
+//  */
+// uint8_t packet_encode(packet_t packet);
+
+/**
+ * @brief Read the next byte from the IR receiver and decode into the given `packet`.
+ * @param packet Pass by reference `packet` object for the byte to be decoded into.
+ * @return true if a *valid* packet was received from IR and decoded into `packet`.
+ * @return false if there wasn't a byte ready to be received, or if an invalid packet was read.
+ */
 bool packet_get(packet_t* packet);
-/** Send the given packet through IR to the other device.*/
+
+/**
+ * @brief Encode the given `packet` into a byte and transmit it via IR.
+ * @param packet The packet to be encoded and sent
+ */
 void packet_send(packet_t packet);
-/** Decode the given byte into the packet structure. */
-bool packet_decode(uint8_t byte, packet_t* packet);
-/** Encodes the packet id and data into a byte to be sent by the IR. */
-uint8_t packet_encode(packet_t packet);
-/** Handles what steps to take depending on the type of packet recieved.*/
+
+/**
+ * @brief Contains the functionality to handle a received packet.
+ * @param packet A valid packet received from `packet_get`.
+ */
 void handle_packet(packet_t packet);
 
 /**
- * Checks to see if we should send the die packet.
- * This function checks if both players are dead, then the game is over.
+ * @brief Checks to see if we should send the die packet.
+ * Additionally, checks if both players are dead, then the game is over.
  */
 void check_die_packet(void);
 
 /**
- * If game_data->host is true, the 
+ * @brief Send the Ping packet, if game_data->host is true (if we were the board that sent the Pairing)
  */
 void check_ping_pong_packet(void);
 #endif  // PACKET_H

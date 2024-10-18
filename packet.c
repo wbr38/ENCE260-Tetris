@@ -10,11 +10,12 @@
 
 #include "game_data.h"
 
-// Generate a binary number of n 1s. E.g.: ONES(3) -> 0b111
-#define ONES(n) ((1 << (n)) - 1)
-
 /**
- * Decode the given byte into the packet structure.
+ * @brief Decode the given `byte` into the `packet`.
+ * @param byte The unmodified uint8_t received from the IR sensor.
+ * @param packet Pass by reference `packet` object.
+ * @return Whether the byte that was decoded is valid.
+ *         i.e. the packet ID received is valid.
  */
 bool packet_decode(uint8_t byte, packet_t* packet)
 {
@@ -28,7 +29,9 @@ bool packet_decode(uint8_t byte, packet_t* packet)
 }
 
 /**
- * Encodes the packet id and data into a byte to be sent by the IR.
+ * @brief Encode the given packet into a uint8_t byte to be sent by IR.
+ * @param packet The packet to be sent
+ * @return The byte to be sent by the IR transmitter.
  */
 uint8_t packet_encode(packet_t packet)
 {
@@ -36,7 +39,10 @@ uint8_t packet_encode(packet_t packet)
 }
 
 /**
- * Gets the byte and packet from a given packet.
+ * @brief Read the next byte from the IR receiver and decode into the given `packet`.
+ * @param packet Pass by reference `packet` object for the byte to be decoded into.
+ * @return true if a *valid* packet was received from IR and decoded into `packet`.
+ * @return false if there wasn't a byte ready to be received, or if an invalid packet was read.
  */
 bool packet_get(packet_t* packet)
 {
@@ -49,7 +55,8 @@ bool packet_get(packet_t* packet)
 }
 
 /**
- * Send the given packet through IR to the other device.
+ * @brief Encode the given `packet` into a byte and transmit it via IR.
+ * @param packet The packet to be encoded and sent
  */
 void packet_send(packet_t packet)
 {
@@ -58,7 +65,8 @@ void packet_send(packet_t packet)
 }
 
 /**
- * Handles what steps to take depending on the type of packet recieved.
+ * @brief Contains the functionality to handle a received packet.
+ * @param packet A valid packet received from `packet_get`.
  */
 void handle_packet(packet_t packet)
 {
@@ -166,7 +174,7 @@ void check_die_packet(void)
 }
 
 /**
- * If game_data->host is true, the
+ * @brief Send the Ping packet, if game_data->host is true (if we were the board that sent the Pairing)
  */
 void check_ping_pong_packet(void)
 {

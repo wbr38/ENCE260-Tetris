@@ -11,7 +11,10 @@
 #include "game_data.h"
 #include "packet.h"
 
-/** Initialises the board data */
+/**
+ * @brief Initialises the board state
+ * @param board Pass by reference `board` to be initialized
+ */
 void board_init(board_t** board)
 {
     if (*board == NULL)
@@ -56,7 +59,12 @@ bool board_valid_position(board_t* board, piece_t* piece, uint8_t x, uint8_t y, 
     return true;
 }
 
-/** Shift all the rows above the given `row` down */
+/**
+ * @brief Shift all the rows above the given `row` down
+ * @param board The board object, (`game_data->board`)
+ * @param row The rows above this `row` will be shifted down.
+ *            This will essentially the clear this row.
+ */
 void board_shift_down(board_t* board, uint8_t row)
 {
     for (uint8_t y = row; y > 0; y--)
@@ -93,7 +101,11 @@ uint8_t board_clear_lines(board_t* board)
     return num_clears;
 }
 
-/** Place this tetris piece at its current position on the board. */
+/**
+ * @brief Place the given tetris piece at its current position on the board
+ * @param board The board to place the piece on. (`game_data->board`)
+ * @param piece The piece to be placed on the board. (`game_data->piece`)
+ */
 void board_place_piece(board_t* board, piece_t* piece)
 {
     const tinygl_point_t* points = piece_get_points(piece, piece->pos.x, piece->pos.y, piece->orientation);

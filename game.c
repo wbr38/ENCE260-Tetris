@@ -1,7 +1,7 @@
 /** @file game.c
  *  @authors William Brown, Matthew Wills
  *  @date 12 October 2024
- *  @brief A 1v1 tetris game
+ *  @brief A multiplayer 1v1 tetris game
  */
 
 #include <stdbool.h>
@@ -22,18 +22,18 @@
 #include <tinygl.h>
 
 // Task frequency (in Hz)
-#define BUTTON_TASK_FREQ      100
-#define DISPLAY_TASK_FREQ     300
-#define IR_TASK_FREQ          100
-#define LED_FLASH_TASK_FREQ   8  // 1/8 -> 125ms
-#define BOARD_MOVE_DOWN_FREQ  1  // 1s
-#define SEND_PACKET_TASK_FREQ 2  // 1/2 = 500ms
+#define BUTTON_TASK_FREQ      100  // 1/10  -> 10ms
+#define DISPLAY_TASK_FREQ     300  // 1/300 -> 3.33ms
+#define IR_TASK_FREQ          100  // 1/100 -> 10ms
+#define LED_FLASH_TASK_FREQ   8    // 1/8   -> 125ms
+#define BOARD_MOVE_DOWN_FREQ  1    // 1/1   -> 1s
+#define SEND_PACKET_TASK_FREQ 2    // 1/2   -> 500ms
 
 // Constants
 #define TINYGL_SPEED 25
 
 /**
- * Task to poll the push button and nav switch controls
+ * Task to poll and handle the push button and nav switch controls
  */
 static void button_task(__unused__ void* data)
 {
@@ -77,22 +77,6 @@ static void button_task(__unused__ void* data)
             return;
         }
 
-    case GAME_STATE_PAUSED:
-        {
-            if (button_push_event_p(BUTTON1))
-            {
-                if (game_data->game_state == GAME_STATE_PAUSED)
-                {
-                    game_data->game_state = GAME_STATE_PLAYING;
-                }
-                else
-                {
-                    game_data->game_state = GAME_STATE_PAUSED;
-                }
-            }
-            return;
-        }
-
     case GAME_STATE_GAME_OVER:
         {
             // Restart game, reinitialise data
@@ -110,7 +94,8 @@ static void button_task(__unused__ void* data)
  */
 static void display_task(__unused__ void* data)
 {
-    // Detetct when game_state has been changed
+    // Detetct when game_state has been changed.
+    // The calls to tinygl_text should only be done once when the state has changed.
     static game_state_t old_state = 42;
     bool state_changed = game_data->game_state != old_state;
     old_state = game_data->game_state;
@@ -231,7 +216,7 @@ static void board_move_down_task(__unused__ void* data)
         return;
 
     // Detect when a new piece has been spawned, skip moving for this iteration
-    // so the piece isn't moved down immediately as soon as it's spawnedk
+    // so the piece isn't moved down immediately as soon as it's spawned
     static piece_t* old_piece = 0;
     if (old_piece != game_data->current_piece)
     {
@@ -241,12 +226,13 @@ static void board_move_down_task(__unused__ void* data)
 
     bool was_moved = piece_move(game_data->current_piece, DIRECTION_DOWN);
 
-    // piece was not able to be moved down, so we place this piece on the board at the current location
-    // and spawn the next piece
+    // the piece was not able to be moved down, so place the piece on the board at the currenet location
     if (!was_moved)
     {
         board_place_piece(game_data->board, game_data->current_piece);
         bool valid_pos = piece_generate_next(&game_data->current_piece);
+
+        // next piece was not able to be spawned, so we have died.
         if (!valid_pos)
             game_data->game_state = GAME_STATE_DEAD;
     }
@@ -271,7 +257,7 @@ static void ir_update_task(__unused__ void* data)
 static void led_flash_task(__unused__ void* data)
 {
     // each alternating call of this task just sets the LED to false and does nothing else
-    // this gives the flash effect
+    // this gives a flashing effect
     static bool toggle = false;
     toggle = !toggle;
     if (toggle)
@@ -294,15 +280,17 @@ static void led_flash_task(__unused__ void* data)
  */
 static void send_packet_task(__unused__ void* data)
 {
+    // Send die packet, and check if the game is over
     check_die_packet();
     game_data_check_game_over();
 
+    // Ping / Pong functionality
     check_ping_pong_packet();
     game_data_check_pause();
 }
 
 /**
- * Initialise the ucfk4 system and components
+ * Initialise the ucfk4 system and components.
  */
 static inline void environment_init(void)
 {

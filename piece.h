@@ -38,12 +38,6 @@ typedef struct
 } piece_t;
 
 /**
- * @brief Spawn the next piece (`current_piece`)
- * @return Whether the piece spawned at a valid position. If this function returns
- *         `false`, then the game is over.
- */
-
-/**
  * @brief Spawn/initialise the next tetris piece into `current_piece`.
  * @param current_piece Pass by reference the pointer to the current_piece.
  * @return Whether the piece spawned at a valid position. If this function returns
@@ -51,7 +45,9 @@ typedef struct
  */
 bool piece_generate_next(piece_t** current_piece);
 
-/** Returns a tinygl_point_t array for the given orientation of this piece. */
+/**
+ * @brief Returns a tinygl_point_t array for the given orientation of this piece.
+ */
 const tinygl_point_t* piece_get_points(piece_t* piece, uint8_t x, uint8_t y, orientation_t orientation);
 
 /**

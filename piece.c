@@ -13,14 +13,14 @@
 #include "board.h"
 #include "game_data.h"
 
+// Simply combines 4 params (each param should just be be 4 bits) into a single binary string, for easier visualation.
+#define BINARY(a, b, c, d) 0b##a##b##c##d
+
 /**
  * Precalculated tetris pieces and their rotations. (see image: https://harddrop.com/wiki/File:SRS-pieces.png)
  * Every piece always has exactly 4 points, so we define each piece on a 4x4 grid.
  * This fits nicely (4x4 = 16 bits) into a uint16_t.
  */
-
-// Simply combines 4 params (each param should just be be 4 bits) into a single binary string, for easier visualation.
-#define BINARY(a, b, c, d) 0b##a##b##c##d
 const uint16_t pieces[PIECES_COUNT][PIECE_NUM_ROTATIONS] = {
     // clang-format off
 
@@ -188,6 +188,9 @@ const uint16_t pieces[PIECES_COUNT][PIECE_NUM_ROTATIONS] = {
     // clang-format on
 };
 
+/**
+ * @brief Randomly shuffle the itmes in the given array.
+ */
 static void shuffle_array(uint8_t* arr, size_t size)
 {
     for (uint8_t i = 0; i < size; i++)
@@ -199,11 +202,17 @@ static void shuffle_array(uint8_t* arr, size_t size)
     }
 }
 
+/**
+ * @brief Spawn/initialise the next tetris piece into `current_piece`.
+ * @param current_piece Pass by reference the pointer to the current_piece.
+ * @return Whether the piece spawned at a valid position. If this function returns
+ *         `false`, then the game is over.
+ */
 bool piece_generate_next(piece_t** current_piece)
 {
     static uint8_t _nextPieceId = 0;
 
-    // On first call, randomise the indexes used for the `pieces` array. 
+    // On first call, randomise the indexes used for the `pieces` array.
     static bool init = false;
     static uint8_t pieceIdx[PIECES_COUNT] = {0, 1, 2, 3, 4, 5, 6};
     if (!init)
@@ -239,6 +248,9 @@ bool piece_generate_next(piece_t** current_piece)
     return valid_pos;
 }
 
+/**
+ * @brief Returns a tinygl_point_t array for the given orientation of this piece.
+ */
 const tinygl_point_t* piece_get_points(piece_t* piece, uint8_t x, uint8_t y, orientation_t orientation)
 {
     static tinygl_point_t points[PIECE_NUM_POINTS];
@@ -247,7 +259,7 @@ const tinygl_point_t* piece_get_points(piece_t* piece, uint8_t x, uint8_t y, ori
     // As stated above, each tetris piece is defined on a 4x4 grid.
     // We start with the left most bit, and continually shift it to the right, to test if the bit
     // in the given position is 1, indicating a point.
-    // think of this uint16_t as groupings of 4 bits: 4 columns and 4 rows (see how the pieces array is defined)
+    // think of this uint16_t as groupings of 4 bits: 4 columns and 4 rows (see above how the pieces array is defined)
 
     uint16_t test_bit = 0b1000000000000000;
 
@@ -256,7 +268,7 @@ const tinygl_point_t* piece_get_points(piece_t* piece, uint8_t x, uint8_t y, ori
     {
         for (uint8_t row = 0; row < PIECE_GRID_SIZE; row++)
         {
-            // there is a 1 in this bit pos
+            // if there is a 1 in this bit pos
             if (pattern & test_bit)
             {
                 points[i].x = row + x;
@@ -271,6 +283,11 @@ const tinygl_point_t* piece_get_points(piece_t* piece, uint8_t x, uint8_t y, ori
     return points;
 }
 
+/**
+ * @brief Attempt to rotate the piece clockwise.
+ * @return true if the piece was succesfully rotated.
+ * @return false if the piece was not able to be rotated (e.g. would collide with a wall).
+ */
 bool piece_rotate(piece_t* piece)
 {
     orientation_t new_orientation = (piece->orientation + 1) % PIECE_NUM_ROTATIONS;
@@ -283,6 +300,11 @@ bool piece_rotate(piece_t* piece)
     return true;
 }
 
+/**
+ * @brief Attempt to move the piece in the given direction.
+ * @return true if the piece was successfully moved.
+ * @return false if the piece was not able to be moved in the given direction (e.g. would collide a wall).
+ */
 bool piece_move(piece_t* piece, direction_t direction)
 {
     int8_t x = piece->pos.x;
@@ -320,6 +342,9 @@ bool piece_move(piece_t* piece, direction_t direction)
     return true;
 }
 
+/**
+ * @brief Draws the given piece on the LED matrix.
+ */
 void piece_draw(piece_t* piece)
 {
     const tinygl_point_t* points = piece_get_points(piece, piece->pos.x, piece->pos.y, piece->orientation);
